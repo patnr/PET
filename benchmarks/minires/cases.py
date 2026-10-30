@@ -37,6 +37,8 @@ LOGK_MEAN, LOGK_SD = np.log(200.0), 0.8
 
 CORNERS = ((0.15, 0.15), (0.85, 0.15), (0.15, 0.85), (0.85, 0.85))
 CENTRE = ((0.5, 0.5),)
+NINE = tuple((x, y) for y in (0.1, 0.5, 0.9) for x in (0.1, 0.5, 0.9))  # producers on a 3 x 3 grid
+FOUR = ((0.3, 0.3), (0.7, 0.3), (0.3, 0.7), (0.7, 0.7))  # injectors between them
 
 
 @dataclass(frozen=True)
@@ -146,6 +148,18 @@ CASES = {
     for c in [
         Case("coarse", 25, truths=20, sizes=(20, 50, 100)),
         Case("fine", 50, truths=8),
+        # Oil 50 times as viscous as water: the water breaks through early and abruptly, so the
+        # history is strongly nonlinear in the permeability. Where iterating should pay.
+        Case("unfavourable", 25, truths=20, vo=50.0),
+        # Nine producers and four injectors, on a field of half the correlation range: many data,
+        # each informative about its own neighbourhood only. Where localization should pay.
+        Case("pattern", 25, truths=20, producers=NINE, injectors=FOUR, range=150.0),
+        # Every step of the history assimilated: 144 data for 50 members, closely spaced in time.
+        # Where the analyses for more data than members (subspace, margIS) should pay.
+        Case("dense", 25, truths=20, obs_every=1),
+        # Only the first 6 steps observed, before any water breaks through: rates and pressures,
+        # nearly linear in the permeability. Where a single update should do.
+        Case("early", 25, truths=20, history=6, obs_every=2),
     ]
 }
 
