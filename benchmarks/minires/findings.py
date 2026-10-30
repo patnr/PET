@@ -37,11 +37,6 @@ FINDINGS = {
         "chosen on `coarse`, is too wide here, where the prior's range is 150 m: it forecasts no better, and "
         "is worse than the prior on the field."
     ),
-    "dense": (
-        "Assimilating every step changes little from `coarse`: subspace2 and margIS forecast no better than "
-        "GN-EnRML does (CRPS 0.059, 0.060 and 0.058). margIS, EnIF and distance localization keep more spread, "
-        "and score best on the field (logK CRPS about 0.40)."
-    ),
     "early": (
         "Before the water breaks through, a single update does about as well as any: LM-EnRML and GN-EnRML "
         "forecast no better than ES (CRPS 0.076, against 0.075), and ES-MDA only slightly better (0.072), "

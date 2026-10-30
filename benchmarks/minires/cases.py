@@ -155,9 +155,6 @@ CASES = {
         Case("pattern", 25, truths=20, producers=NINE, injectors=FOUR, range=150.0, about=(
             "Nine producers and four injectors, on a field of half the correlation range (150 m): "
             "many data, each informative about its own neighbourhood only. Where localization should pay.")),
-        Case("dense", 25, truths=20, obs_every=1, about=(
-            "Every step of the history assimilated: 144 data for 50 members. Where the analyses for "
-            "more data than members (subspace2, margIS) should pay.")),
         Case("early", 25, truths=20, history=6, obs_every=2, about=(
             "Only the first 6 steps observed, before any water breaks through: rates and pressures, "
             "nearly linear in the permeability. Where a single update should do.")),
