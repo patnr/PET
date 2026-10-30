@@ -50,6 +50,7 @@ class Case:
     name: str
     n: int  # cells per side
     truths: int  # the number of twin experiments run by default
+    sizes: tuple = (50,)  # the ensemble sizes run by default; the full tables are of NE
 
     @property
     def dx(self):
@@ -111,7 +112,8 @@ class Case:
         return np.array([[row[d][0] for d in DATATYPES] for row in records])
 
 
-CASES = {c.name: c for c in [Case("coarse", 25, truths=20), Case("fine", 50, truths=8)]}
+NE = 50  # the ensemble size of the full tables
+CASES = {c.name: c for c in [Case("coarse", 25, truths=20, sizes=(20, 50, 100)), Case("fine", 50, truths=8)]}
 
 
 @dataclass

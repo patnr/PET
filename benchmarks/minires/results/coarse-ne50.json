@@ -1,12 +1,12 @@
 {
  "meta": {
   "truths": 20,
-  "ne": 50,
-  "commit": "4fca540",
-  "date": "2026-10-29"
+  "ne": 50
  },
  "methods": {
   "ES (one update)": {
+   "commit": "4fca540",
+   "date": "2026-10-29",
    "runs": [
     100,
     100,
@@ -519,6 +519,8 @@
    }
   },
   "LM-EnRML (4 iterations)": {
+   "commit": "4fca540",
+   "date": "2026-10-29",
    "runs": [
     250,
     250,
@@ -1031,6 +1033,8 @@
    }
   },
   "GN-EnRML (4 iterations)": {
+   "commit": "4fca540",
+   "date": "2026-10-29",
    "runs": [
     250,
     250,
@@ -1543,6 +1547,8 @@
    }
   },
   "GN-EnRML (4 iterations), subspace2 analysis": {
+   "commit": "4fca540",
+   "date": "2026-10-29",
    "runs": [
     250,
     250,
@@ -2055,6 +2061,8 @@
    }
   },
   "GN-EnRML (4 iterations), margis analysis": {
+   "commit": "4fca540",
+   "date": "2026-10-29",
    "runs": [
     250,
     250,
@@ -2567,6 +2575,8 @@
    }
   },
   "ES-MDA (4 steps, \u03b1 = 4)": {
+   "commit": "4fca540",
+   "date": "2026-10-29",
    "runs": [
     250,
     250,
@@ -3079,6 +3089,8 @@
    }
   },
   "ES-MDA (4 steps, \u03b1 = 4), enif analysis": {
+   "commit": "4fca540",
+   "date": "2026-10-29",
    "runs": [
     250,
     250,
@@ -3591,6 +3603,8 @@
    }
   },
   "ES-MDA (4 steps, \u03b1 = 4), adaptive localization (universal threshold)": {
+   "commit": "4fca540",
+   "date": "2026-10-29",
    "runs": [
     250,
     250,
@@ -4103,6 +4117,8 @@
    }
   },
   "ES-MDA (4 steps, \u03b1 = 4), adaptive localization (3\u03c3 threshold)": {
+   "commit": "4fca540",
+   "date": "2026-10-29",
    "runs": [
     250,
     250,
@@ -4615,6 +4631,8 @@
    }
   },
   "ES-MDA (4 steps, \u03b1 = 4), distance localization (Gaspari-Cohn, 300 m)": {
+   "commit": "4fca540",
+   "date": "2026-10-29",
    "runs": [
     250,
     250,

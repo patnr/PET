@@ -26,7 +26,7 @@ same truths, the same scores.
 | `methods.py` | The methods compared, each a label and its PET settings (`[dataassim]`). |
 | `scores.py` | What an ensemble is scored on. |
 | `run.py` | Runs the methods on the cases, and generates `RESULTS.md`. |
-| `results/` | The scores of each case, per method and truth (JSON), from which `RESULTS.md` is generated. |
+| `results/` | The scores of each case and ensemble size (`<case>-ne<ne>.json`), per method and truth, with the PET commit each method was run at; `RESULTS.md` is generated from them. |
 | `RESULTS.md` | The tables. Generated; do not edit by hand. |
 
 `tests/test_benchmark_minires.py` checks that each method still runs, on one tiny experiment.
@@ -37,17 +37,22 @@ Needs the `minires` extra (`pip install -e .[minires]`). From this directory:
 
 ```sh
 python run.py --quick               # while developing: the coarse case, 5 truths, about a minute
-python run.py                       # the official run: every method and case (over 10 minutes)
+python run.py                       # the official run: every method, case and ensemble size
+python run.py --ne 20               # only this ensemble size (default: the case's own sizes)
 python run.py --method "ES-MDA"     # only the methods whose label contains this, and the reference (ES)
 ```
 
-A quick run (fewer truths than the case's own) prints its table and writes nothing. It is
+A run of other than the case's own number of truths, such as a quick run, prints its tables
+and writes nothing. It is
 printed next to the official scores on the same truths; the experiments are seeded, so any
 difference is due to the code. Its numbers are tentative: with so few truths, the differences
 between methods are often within the noise.
 
 The official run writes `results/` and `RESULTS.md`. It is redone from time to time, not with
-every change, so `RESULTS.md` may lag behind the methods and scores defined here.
+every change, so `RESULTS.md` may lag behind the methods and scores defined here. A run of some
+of the methods replaces only their rows; a row run at another PET commit than the rest of its
+table is marked with that commit. The full tables are at 50 members (`NE` of `cases.py`); a case
+with other sizes (`sizes`) also gets a few scores tabled against the ensemble size.
 
 ## Adding a method or a score
 

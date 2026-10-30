@@ -3,17 +3,19 @@
 
     python run.py                       # every method, every case, the default number of truths
     python run.py --case coarse         # one case
+    python run.py --ne 20               # one ensemble size (default: the case's own sizes)
     python run.py --method "ES-MDA"     # the methods whose label contains this, and the reference
     python run.py --quick               # a check while developing: the coarse case, a few truths
 
-A run of fewer truths than the case's own is a check, printed and not written to results/:
-its truths are the first of the official run's, so it is printed next to the official scores
-on those same truths, and any difference is due to the code (the experiments are seeded).
+A run of other than the case's own number of truths is a check, printed and not written to
+results/: its truths are the first of the official run's, so it is printed next to the official
+scores on those same truths, and any difference is due to the code (the experiments are seeded).
 
 Each (method, truth) is one twin experiment, run in its own process and its own
 temporary directory, so that what PET writes there (results, logs) goes nowhere.
-The scores of each are kept in ``results/<case>.json``; RESULTS.md is generated from those.
-A run of a subset of the methods replaces their entries and leaves the others'.
+The scores of each are kept in ``results/<case>-ne<ne>.json``, with the PET commit each
+method was run at; RESULTS.md is generated from those. A run of a subset of the methods
+replaces their entries and leaves the others'.
 """
 
 import os
@@ -35,7 +37,7 @@ from pathlib import Path
 import numpy as np
 import pandas as pd
 
-from cases import CASES, DATATYPES, HISTORY, NSTEPS, OBS_STEPS, SCALARS, twin
+from cases import CASES, DATATYPES, HISTORY, NE, NSTEPS, OBS_STEPS, SCALARS, twin
 from input_output.config import normalize
 from methods import COMMON, METHODS, REFERENCE
 from pipt.update_schemes.registry import get_scheme
@@ -44,7 +46,7 @@ from simulator.minires import MiniRes
 
 HERE = Path(__file__).parent
 TRUTH_SEED, ENSEMBLE_SEED = 1000, 2000  # truth i is drawn with TRUTH_SEED + i
-QUICK = {"case": ["coarse"], "truths": 5}
+QUICK = {"case": ["coarse"], "truths": 5, "ne": [NE]}
 
 
 class CountingMiniRes(MiniRes):
@@ -150,16 +152,31 @@ def cell(values, ref=None, prior=None, better=0) -> str:
     return text
 
 
+def provenance(runs: dict) -> tuple:
+    """The commit and date most rows were run at, and the rows run at another commit."""
+    commits = [r["commit"] for r in runs.values()]
+    usual = max(set(commits), key=commits.count)
+    date_ = max(r["date"] for r in runs.values() if r["commit"] == usual)
+    return usual, date_, {label: r["commit"] for label, r in runs.items() if r["commit"] != usual}
+
+
+def label_of(label: str, other: dict) -> str:
+    """The row's label, marked if it is the reference, or was run at another commit."""
+    return label + (" (reference)" if label == REFERENCE else "") + (f" [`{other[label]}`]" if label in other else "")
+
+
 def render_case(title: str, res: dict) -> list:
     meta, runs = res["meta"], res["methods"]
     prior = next(iter(runs.values()))["prior"]  # the same for every method: the same seeds
     ref = runs[REFERENCE]["posterior"]
+    usual, date_, other = provenance(runs)
     lines = [
         "",
         title,
         "",
         f"{meta['truths']} truths, {meta['ne']} members; history of {HISTORY} of {NSTEPS} steps, "
-        f"observed at steps {OBS_STEPS}. PET at `{meta['commit']}`, {meta['date']}.",
+        f"observed at steps {OBS_STEPS}. PET at `{usual}`, {date_}"
+        + (", except the rows marked with another commit." if other else "."),
     ]
     rows = [("prior", prior, None)] + [(label, r["posterior"], r["runs"]) for label, r in runs.items()]
     for heading, columns in TABLES.items():
@@ -178,11 +195,42 @@ def render_case(title: str, res: dict) -> list:
                     against = None if label == REFERENCE else ref.get(k)
                     flag_vs = None if label == "prior" else prior.get(k)
                     cells.append(cell(sc[k], against, flag_vs, BETTER.get(k, 0)))
-            lines += [f"| {label}{' (reference)' if label == REFERENCE else ''} | " + " | ".join(cells) + " |"]
+            lines += [f"| {label_of(label, other)} | " + " | ".join(cells) + " |"]
+    return lines
+
+
+# The scores shown against the ensemble size, each {score: heading}
+BY_SIZE = {"forecast_wwct_crps": "CRPS forecast WWCT", "logk_crps": "logK CRPS", "logk_spread": "logK spread"}
+
+
+def render_sizes(title: str, by_ne: dict) -> list:
+    """A few scores of each method, at each ensemble size: ``by_ne`` is ``{ne: results}``."""
+    sizes = sorted(by_ne)
+    truths = {by_ne[ne]["meta"]["truths"] for ne in sizes}
+    lines = ["", title, "", f"{', '.join(map(str, sorted(truths)))} truths. The ± are against ES at the same size."]
+    labels = [m["label"] for m in METHODS if any(m["label"] in by_ne[ne]["methods"] for ne in sizes)]
+    for k, heading in BY_SIZE.items():
+        lines += ["", f"**{heading}**", ""]
+        lines += ["| | " + " | ".join(f"{ne} members" for ne in sizes) + " |", "|---" * (len(sizes) + 1) + "|"]
+        for label in ["prior", *labels]:
+            cells = []
+            for ne in sizes:
+                runs = by_ne[ne]["methods"]
+                prior = next(iter(runs.values()))["prior"]
+                ref = runs[REFERENCE]["posterior"]
+                sc = prior if label == "prior" else runs.get(label, {}).get("posterior", {})
+                if k not in sc:
+                    cells.append("")
+                    continue
+                against = None if label == REFERENCE else ref.get(k)
+                flag_vs = None if label == "prior" else prior.get(k)
+                cells.append(cell(sc[k], against, flag_vs, BETTER.get(k, 0)))
+            lines += [f"| {label_of(label, {})} | " + " | ".join(cells) + " |"]
     return lines
 
 
 def render(results: dict) -> str:
+    """``results`` is ``{case: {ne: results}}``."""
     lines = [
         "# MiniRes benchmark: results",
         "",
@@ -197,9 +245,12 @@ def render(results: dict) -> str:
         "- A lower (data) misfit is not necessarily better; could be overfitting.",
         "- Failed simulations are left out of the data and forecast scores, and counted in `failed members`.",
     ]
-    for case_name, res in results.items():
+    for case_name, by_ne in results.items():
         case = CASES[case_name]
-        lines += render_case(f"## Case `{case_name}`: {case.n} x {case.n} cells", res)
+        if NE in by_ne:
+            lines += render_case(f"## Case `{case_name}`: {case.n} x {case.n} cells", by_ne[NE])
+        if len(by_ne) > 1:
+            lines += render_sizes(f"### Case `{case_name}`: by ensemble size", by_ne)
     return "\n".join(lines) + "\n"
 
 
@@ -207,7 +258,7 @@ def first_truths(res: dict, truths: int, labels) -> dict:
     """The official results ``res``, of the methods ``labels``, cut down to their first ``truths``."""
 
     def cut(v):
-        return {k: cut(w) for k, w in v.items()} if isinstance(v, dict) else v[:truths]
+        return {k: cut(w) for k, w in v.items()} if isinstance(v, dict) else v[:truths] if isinstance(v, list) else v
 
     methods = {label: cut(r) for label, r in res["methods"].items() if label in labels}
     return {"meta": {**res["meta"], "truths": truths}, "methods": methods}
@@ -222,59 +273,76 @@ def commit() -> str:
     return git("log", "-1", "--format=%h", "--", src) + ("-dirty" if git("status", "--porcelain", "--", src) else "")
 
 
+def results_file(case_name: str, ne: int) -> Path:
+    return HERE / "results" / f"{case_name}-ne{ne}.json"
+
+
+def load_all() -> dict:
+    """Every official result there is: ``{case: {ne: results}}``, in the order of CASES and size."""
+    found = {}
+    for case_name in CASES:
+        files = sorted(HERE.glob(f"results/{case_name}-ne*.json"), key=lambda f: int(f.stem.split("-ne")[1]))
+        if files:
+            found[case_name] = {int(f.stem.split("-ne")[1]): json.loads(f.read_text()) for f in files}
+    return found
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     parser.add_argument("--case", choices=list(CASES), action="append", help="default: all")
     parser.add_argument("--method", action="append", help="label substring (and the reference); default: all")
     parser.add_argument("--truths", type=int, help="default: the case's own")
-    parser.add_argument("--ne", type=int, default=50)
+    parser.add_argument("--ne", type=int, action="append", help="default: the case's own sizes")
     parser.add_argument("--workers", type=int, default=os.cpu_count())
     parser.add_argument("--quick", action="store_true", help=f"default to {QUICK}")
     args = parser.parse_args()
     if args.quick:
         args.case = args.case or QUICK["case"]
         args.truths = args.truths or QUICK["truths"]
+        args.ne = args.ne or QUICK["ne"]
 
     # The reference is always run: the other rows' ± are against it
     picked = [m for m in METHODS if not args.method or any(s in m["label"] for s in args.method)]
     methods = [m for m in METHODS if m in picked or m["label"] == REFERENCE]
-    quick = args.truths is not None and args.truths < min(CASES[c].truths for c in args.case or CASES)
 
-    for case_name in args.case or CASES:
-        truths = args.truths or CASES[case_name].truths
-        jobs = [(m, i) for m in methods for i in range(truths)]
-        print(f"{case_name}: {len(methods)} method(s) x {truths} truths ...", flush=True)
-        with ProcessPoolExecutor(args.workers, initializer=logging.disable, initargs=(logging.WARNING,)) as pool:
-            done = list(pool.map(experiment, *zip(*[(case_name, m, i, args.ne) for m, i in jobs])))
+    # Every experiment of every (case, size) in one pool, so that many cores are kept busy
+    runs = [(c, ne, args.truths or CASES[c].truths) for c in args.case or CASES for ne in args.ne or CASES[c].sizes]
+    jobs = [(c, ne, m, i) for c, ne, truths in runs for m in methods for i in range(truths)]
+    print(f"{len(jobs)} experiments: " + ", ".join(f"{c} ({ne} members, {t} truths)" for c, ne, t in runs), flush=True)
+    with ProcessPoolExecutor(args.workers, initializer=logging.disable, initargs=(logging.WARNING,)) as pool:
+        done = list(pool.map(experiment, *zip(*[(c, m, i, ne) for c, ne, m, i in jobs])))
 
-        res_file = HERE / "results" / f"{case_name}.json"
-        meta = {"truths": truths, "ne": args.ne, "commit": commit(), "date": str(date.today())}
+    stamp = {"commit": commit(), "date": str(date.today())}
+    wrote = False
+    for case_name, ne, truths in runs:
+        res_file = results_file(case_name, ne)
         old = json.loads(res_file.read_text()) if res_file.exists() else None
-        compatible = old and (old["meta"]["truths"], old["meta"]["ne"]) == (truths, args.ne)
-        results = {"meta": meta, "methods": dict(old["methods"]) if compatible else {}}
+        compatible = old and old["meta"] == {"truths": truths, "ne": ne}
+        results = {"meta": {"truths": truths, "ne": ne}, "methods": dict(old["methods"]) if compatible else {}}
         for m in methods:
-            mine = [d for (mm, _), d in zip(jobs, done) if mm is m]
+            mine = [d for (c, n, mm, _), d in zip(jobs, done) if (c, n, mm) == (case_name, ne, m)]
             results["methods"][m["label"]] = {
+                **stamp,
                 "runs": [d["runs"] for d in mine],
                 **{s: {k: [d[s][k] for d in mine] for k in mine[0][s]} for s in ("prior", "posterior")},
             }
         results["methods"] = {m["label"]: results["methods"][m["label"]] for m in METHODS if m["label"] in results["methods"]}
 
-        if quick:
-            print("\n".join(render_case(f"## Case `{case_name}`: this run", results)))
-            official = {"methods": {}}
-            if old and old["meta"]["ne"] == args.ne and old["meta"]["truths"] >= truths:
+        # Only the case's own number of truths is official; any other is a check
+        if truths != CASES[case_name].truths:
+            print("\n".join(render_case(f"## Case `{case_name}`, {ne} members: this run", results)))
+            if old and old["meta"]["truths"] >= truths:
                 official = first_truths(old, truths, results["methods"])
-            if official["methods"]:
-                print("\n".join(render_case(f"## Case `{case_name}`: official, on the same truths", official)))
+                if official["methods"]:
+                    print("\n".join(render_case(f"## Case `{case_name}`, {ne} members: official, on the same truths", official)))
             print()
             continue
         res_file.parent.mkdir(exist_ok=True)
         res_file.write_text(json.dumps(results, indent=1) + "\n")
+        wrote = True
 
-    if not quick:
-        everything = {c: json.loads((HERE / "results" / f"{c}.json").read_text()) for c in CASES if (HERE / "results" / f"{c}.json").exists()}
-        (HERE / "RESULTS.md").write_text(render(everything))
+    if wrote:
+        (HERE / "RESULTS.md").write_text(render(load_all()))
         print("Wrote RESULTS.md")
 
 
