@@ -3,7 +3,7 @@
 
     python run.py                       # every method, every case, the default number of truths
     python run.py --case coarse         # one case
-    python run.py --method "ES-MDA"     # the methods whose label contains this
+    python run.py --method "ES-MDA"     # the methods whose label contains this, and the reference
     python run.py --quick               # a check while developing: the coarse case, a few truths
 
 A run of fewer truths than the case's own is a check, printed and not written to results/:
@@ -37,7 +37,7 @@ import pandas as pd
 
 from cases import CASES, DATATYPES, HISTORY, NSTEPS, OBS_STEPS, SCALARS, twin
 from input_output.config import normalize
-from methods import COMMON, METHODS
+from methods import COMMON, METHODS, REFERENCE
 from pipt.update_schemes.registry import get_scheme
 from scores import scores
 from simulator.minires import MiniRes
@@ -104,29 +104,56 @@ def experiment(case_name: str, method: dict, i: int, ne: int) -> dict:
 # ----------------------------------------------------------------------
 # Tables
 # ----------------------------------------------------------------------
-COLUMNS = {
-    "misfit": "misfit",
-    "forecast_wwct_rmse": "RMSE forecast WWCT",
-    "forecast_wwct_crps": "CRPS forecast WWCT",
-    "logk_rmse": "logK RMSE",
-    "logk_corr": "logK corr",
-    "logk_spread": "logK spread",
-    "logk_crps": "logK CRPS",
-    **{f"{n}_{s}": f"{n} {t}" for n in SCALARS for s, t in [("error",) * 2, ("spread",) * 2, ("crps", "CRPS")]},
-    "runs": "simulations",
+# The tables of each case, each {score: column}
+TABLES = {
+    "The data and its forecast": {
+        "misfit": "misfit",
+        "forecast_wwct_rmse": "RMSE forecast WWCT",
+        "forecast_wwct_crps": "CRPS forecast WWCT",
+        "failed": "failed members",
+        "runs": "simulations",
+    },
+    "The log-permeability": {"logk_rmse": "RMSE", "logk_corr": "corr", "logk_spread": "spread", "logk_crps": "CRPS"},
+    **{f"The scalar `{n}`": {f"{n}_error": "error", f"{n}_spread": "spread", f"{n}_crps": "CRPS"} for n in SCALARS},
 }
+COUNTS = ["failed", "runs"]  # shown as plain means
+
+# Which way is better (+1 higher, -1 lower), for the scores that have one: a posterior
+# worse than the prior on these is flagged. The misfit has a target (1), not a direction.
+BETTER = {
+    "forecast_wwct_rmse": -1,
+    "forecast_wwct_crps": -1,
+    "logk_rmse": -1,
+    "logk_corr": +1,
+    "logk_crps": -1,
+    **{f"{n}_{s}": -1 for n in SCALARS for s in ("error", "crps")},
+}
+WORSE = "⚠"
 
 
-def cell(values) -> str:
-    """Mean, and its standard error over the truths."""
+def stderr(values: np.ndarray) -> float:
+    return values.std(ddof=1) / np.sqrt(len(values))
+
+
+def cell(values, ref=None, prior=None, better=0) -> str:
+    """The mean over the truths; ± the standard error of its difference from ``ref``, truth by
+    truth; and flagged if worse than ``prior``, by more than twice that error of the difference."""
     values = np.asarray(values, dtype=float)
-    if len(values) == 1:
-        return f"{values[0]:.3g}"
-    return f"{values.mean():.3g} ± {values.std(ddof=1) / np.sqrt(len(values)):.2g}"
+    text = f"{values.mean():.3g}"
+    if ref is not None and len(values) > 1:
+        error = stderr(values - np.asarray(ref))  # to one significant figure, never as 1e+01
+        text += f" ± {np.format_float_positional(error, precision=1, unique=False, fractional=False, trim='-')}"
+    if better and prior is not None:
+        gain = better * (values - np.asarray(prior))
+        if gain.mean() < 0 and (len(values) == 1 or -gain.mean() > 2 * stderr(gain)):
+            text += f" {WORSE}"
+    return text
 
 
 def render_case(title: str, res: dict) -> list:
     meta, runs = res["meta"], res["methods"]
+    prior = next(iter(runs.values()))["prior"]  # the same for every method: the same seeds
+    ref = runs[REFERENCE]["posterior"]
     lines = [
         "",
         title,
@@ -134,15 +161,24 @@ def render_case(title: str, res: dict) -> list:
         f"{meta['truths']} truths, {meta['ne']} members; history of {HISTORY} of {NSTEPS} steps, "
         f"observed at steps {OBS_STEPS}. PET at `{meta['commit']}`, {meta['date']}.",
     ]
-    any_method = next(iter(runs.values()))
-    lines += ["", "| | " + " | ".join(COLUMNS.values()) + " |", "|---" * (len(COLUMNS) + 1) + "|"]
-    prior = [cell(any_method["prior"][k]) if k in any_method["prior"] else "" for k in COLUMNS]
-    lines += ["| prior | " + " | ".join(prior) + " |"]
-    for label, r in runs.items():
-        # A score added since the official results were run is blank in them
-        post = [cell(r["posterior"][k]) if k in r["posterior"] else "" for k in COLUMNS]
-        post[list(COLUMNS).index("runs")] = f"{np.mean(r['runs']):.0f}"
-        lines += [f"| {label} | " + " | ".join(post) + " |"]
+    rows = [("prior", prior, None)] + [(label, r["posterior"], r["runs"]) for label, r in runs.items()]
+    for heading, columns in TABLES.items():
+        lines += ["", f"**{heading}**", ""]
+        lines += ["| | " + " | ".join(columns.values()) + " |", "|---" * (len(columns) + 1) + "|"]
+        for label, sc, sims in rows:
+            cells = []
+            for k in columns:
+                if k == "runs":
+                    cells.append(f"{np.mean(sims):.0f}" if sims else "")
+                elif k not in sc:  # a score added since the official results were run
+                    cells.append("")
+                elif k in COUNTS:
+                    cells.append(f"{np.mean(sc[k]):.2g}")
+                else:
+                    against = None if label == REFERENCE else ref.get(k)
+                    flag_vs = None if label == "prior" else prior.get(k)
+                    cells.append(cell(sc[k], against, flag_vs, BETTER.get(k, 0)))
+            lines += [f"| {label}{' (reference)' if label == REFERENCE else ''} | " + " | ".join(cells) + " |"]
     return lines
 
 
@@ -151,9 +187,15 @@ def render(results: dict) -> str:
         "# MiniRes benchmark: results",
         "",
         "Generated by `run.py`; do not edit by hand. See `cases.py` for the cases, `methods.py` for the",
-        "methods and their settings, and `scores.py` for what is scored. Each cell is the mean over",
-        "the twin experiments (truths), ± its standard error. The rows are not ranked: which case",
-        "and which score matters is for the reader to judge.",
+        "methods and their settings, and `scores.py` for what is scored.",
+        "",
+        "- Each cell is the mean over the twin experiments (truths).",
+        "- The ± is the standard error of the cell's *difference* from the reference row's (ES).",
+        "  Every row is run on the same truths, from the same prior ensembles,",
+        "  so that variability due to these somewhat cancels.",
+        f"- {WORSE}: worse than the prior, by more than twice the standard error of the difference.",
+        "- A lower (data) misfit is not necessarily better; could be overfitting.",
+        "- Failed simulations are left out of the data and forecast scores, and counted in `failed members`.",
     ]
     for case_name, res in results.items():
         case = CASES[case_name]
@@ -183,7 +225,7 @@ def commit() -> str:
 def main():
     parser = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     parser.add_argument("--case", choices=list(CASES), action="append", help="default: all")
-    parser.add_argument("--method", action="append", help="label substring; default: all")
+    parser.add_argument("--method", action="append", help="label substring (and the reference); default: all")
     parser.add_argument("--truths", type=int, help="default: the case's own")
     parser.add_argument("--ne", type=int, default=50)
     parser.add_argument("--workers", type=int, default=os.cpu_count())
@@ -193,7 +235,9 @@ def main():
         args.case = args.case or QUICK["case"]
         args.truths = args.truths or QUICK["truths"]
 
-    methods = [m for m in METHODS if not args.method or any(s in m["label"] for s in args.method)]
+    # The reference is always run: the other rows' ± are against it
+    picked = [m for m in METHODS if not args.method or any(s in m["label"] for s in args.method)]
+    methods = [m for m in METHODS if m in picked or m["label"] == REFERENCE]
     quick = args.truths is not None and args.truths < min(CASES[c].truths for c in args.case or CASES)
 
     for case_name in args.case or CASES:

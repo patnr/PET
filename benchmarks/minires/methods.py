@@ -71,3 +71,7 @@ METHODS = [
         },
     },
 ]
+
+# The row the others are compared with, truth by truth: a single update, which iterating improves on
+REFERENCE = "ES (one update)"
+assert REFERENCE in [m["label"] for m in METHODS]

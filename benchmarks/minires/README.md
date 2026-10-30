@@ -38,7 +38,7 @@ Needs the `minires` extra (`pip install -e .[minires]`). From this directory:
 ```sh
 python run.py --quick               # while developing: the coarse case, 5 truths, about a minute
 python run.py                       # the official run: every method and case (over 10 minutes)
-python run.py --method "ES-MDA"     # only the methods whose label contains this
+python run.py --method "ES-MDA"     # only the methods whose label contains this, and the reference (ES)
 ```
 
 A quick run (fewer truths than the case's own) prints its table and writes nothing. It is
@@ -52,4 +52,5 @@ every change, so `RESULTS.md` may lag behind the methods and scores defined here
 ## Adding a method or a score
 
 - A method: an entry in `METHODS` of `methods.py`.
-- A score: a key in the output of `scores.scores`, and a column in `COLUMNS` of `run.py`.
+- A score: a key in the output of `scores.scores`, and a column in `TABLES` of `run.py`; if it
+  has a better direction, an entry in `BETTER`, so that a posterior worse than the prior is flagged.

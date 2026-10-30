@@ -36,18 +36,21 @@ def scores(states: dict, responses: np.ndarray, twin: Twin) -> dict:
     twin : Twin
         The truth and its observations.
     """
-    out = {}
+    # A member whose simulation failed has no response: it is counted, and left out of every
+    # score of the responses alike (but not of the unknowns, which it still has)
+    failed = np.isnan(responses).any(axis=(1, 2))
+    responses = responses[~failed]
+    out = {"failed": int(failed.sum())}
 
     # The history: mean squared normalized misfit, over members and observations
     history = responses[:, np.array(OBS_STEPS) - 1]
-    out["misfit"] = float(np.nanmean(((history - twin.obs) / twin.std) ** 2))
+    out["misfit"] = float(np.mean(((history - twin.obs) / twin.std) ** 2))
 
     # The forecast: RMS error of the ensemble mean's water cut, over the unseen steps
-    forecast = np.nanmean(responses[:, np.array(FORECAST_STEPS) - 1][..., WWCT], axis=0)
+    members = responses[:, np.array(FORECAST_STEPS) - 1][..., WWCT]
     truth = twin.response[np.array(FORECAST_STEPS) - 1][:, WWCT]
-    out["forecast_wwct_rmse"] = float(np.sqrt(np.mean((forecast - truth) ** 2)))
-    members = responses[:, np.array(FORECAST_STEPS) - 1][..., WWCT].reshape(len(responses), -1).T
-    out["forecast_wwct_crps"] = float(np.nanmean(crps(members, truth.ravel())))
+    out["forecast_wwct_rmse"] = float(np.sqrt(np.mean((members.mean(axis=0) - truth) ** 2)))
+    out["forecast_wwct_crps"] = float(np.mean(crps(members.reshape(len(members), -1).T, truth.ravel())))
 
     # The field: error and correlation of the ensemble mean, and the spread left
     logk, true_logk = states["permx"], twin.truth["permx"]
