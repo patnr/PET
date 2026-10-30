@@ -39,7 +39,7 @@ from pathlib import Path
 import numpy as np
 import pandas as pd
 
-from cases import CASES, DATATYPES, HISTORY, NE, NSTEPS, OBS_STEPS, SCALARS, twin
+from cases import CASES, NE, NSTEPS, Case, twin
 from input_output.config import normalize
 from methods import COMMON, METHODS, REFERENCE
 from pipt.update_schemes.registry import get_scheme
@@ -73,10 +73,10 @@ def experiment(case_name: str, method: dict, i: int, ne: int) -> dict:
         case.write_prior_mean("priormean.npz")
         tw = twin(case, TRUTH_SEED + i, "priormean.npz")
 
-        index = pd.Index(OBS_STEPS, name="steps")
-        pd.DataFrame(tw.obs, index=index, columns=DATATYPES).to_csv("data.csv")
+        index = pd.Index(case.obs_steps, name="steps")
+        pd.DataFrame(tw.obs, index=index, columns=case.datatypes).to_csv("data.csv")
         variance = [[str(["abs", float(s**2)]) for s in row] for row in tw.std]
-        pd.DataFrame(variance, index=index, columns=DATATYPES).to_csv("var.csv")
+        pd.DataFrame(variance, index=index, columns=case.datatypes).to_csv("var.csv")
 
         dataassim = {**COMMON, **method["dataassim"], "data": "data.csv", "datavar": "var.csv", "savefolder": "Results"}
         if "localization" in dataassim:  # the grid and the wells are the case's, not the method's
@@ -87,7 +87,7 @@ def experiment(case_name: str, method: dict, i: int, ne: int) -> dict:
             dataassim["localization"] = loc
         keys_da, keys_sim, keys_en = normalize(
             dataassim,
-            case.simulator(OBS_STEPS),
+            case.simulator(case.obs_steps),
             case.ensemble(ne, ENSEMBLE_SEED + i, "priormean.npz"),
         )
         sim = CountingMiniRes(keys_sim)
@@ -108,31 +108,34 @@ def experiment(case_name: str, method: dict, i: int, ne: int) -> dict:
 # ----------------------------------------------------------------------
 # Tables
 # ----------------------------------------------------------------------
-# The tables of each case, each {score: column}
-TABLES = {
-    "The data and its forecast": {
-        "misfit": "misfit",
-        "forecast_wwct_rmse": "RMSE forecast WWCT",
-        "forecast_wwct_crps": "CRPS forecast WWCT",
-        "failed": "failed members",
-        "runs": "simulations",
-    },
-    "The log-permeability": {"logk_rmse": "RMSE", "logk_corr": "corr", "logk_spread": "spread", "logk_crps": "CRPS"},
-    **{f"The scalar `{n}`": {f"{n}_error": "error", f"{n}_spread": "spread", f"{n}_crps": "CRPS"} for n in SCALARS},
-}
-COUNTS = ["failed", "runs"]  # shown as plain means
+def tables(case: Case) -> dict:
+    """The tables of a case, each ``{score: column}``."""
+    return {
+        "The data and its forecast": {
+            "misfit": "misfit",
+            "forecast_wwct_rmse": "RMSE forecast WWCT",
+            "forecast_wwct_crps": "CRPS forecast WWCT",
+            "failed": "failed members",
+            "runs": "simulations",
+        },
+        "The log-permeability": {"logk_rmse": "RMSE", "logk_corr": "corr", "logk_spread": "spread", "logk_crps": "CRPS"},
+        **{
+            f"The scalar `{n}`": {f"{n}_error": "error", f"{n}_spread": "spread", f"{n}_crps": "CRPS"}
+            for n in case.scalars
+        },
+    }
 
-# Which way is better (+1 higher, -1 lower), for the scores that have one: a posterior
-# worse than the prior on these is flagged. The misfit has a target (1), not a direction.
-BETTER = {
-    "forecast_wwct_rmse": -1,
-    "forecast_wwct_crps": -1,
-    "logk_rmse": -1,
-    "logk_corr": +1,
-    "logk_crps": -1,
-    **{f"{n}_{s}": -1 for n in SCALARS for s in ("error", "crps")},
-}
+
+COUNTS = ["failed", "runs"]  # shown as plain means
 WORSE = "⚠"
+
+
+def better(score: str) -> int:
+    """Which way is better (+1 higher, -1 lower, 0 neither): a posterior worse than the prior is
+    flagged. The misfit has a target (1), not a direction; nor has a spread."""
+    if score == "logk_corr":
+        return +1
+    return -1 if score.endswith(("_rmse", "_error", "_crps")) else 0
 
 
 def stderr(values: np.ndarray) -> float:
@@ -167,7 +170,7 @@ def label_of(label: str, other: dict) -> str:
     return label + (" (reference)" if label == REFERENCE else "") + (f" [`{other[label]}`]" if label in other else "")
 
 
-def render_case(title: str, res: dict) -> list:
+def render_case(title: str, res: dict, case: Case) -> list:
     meta, runs = res["meta"], res["methods"]
     prior = next(iter(runs.values()))["prior"]  # the same for every method: the same seeds
     ref = runs[REFERENCE]["posterior"]
@@ -176,12 +179,12 @@ def render_case(title: str, res: dict) -> list:
         "",
         title,
         "",
-        f"{meta['truths']} truths, {meta['ne']} members; history of {HISTORY} of {NSTEPS} steps, "
-        f"observed at steps {OBS_STEPS}. PET at `{usual}`, {date_}"
+        f"{meta['truths']} truths, {meta['ne']} members; history of {case.history} of {NSTEPS} steps, "
+        f"observed at steps {case.obs_steps}. PET at `{usual}`, {date_}"
         + (", except the rows marked with another commit." if other else "."),
     ]
     rows = [("prior", prior, None)] + [(label, r["posterior"], r["runs"]) for label, r in runs.items()]
-    for heading, columns in TABLES.items():
+    for heading, columns in tables(case).items():
         lines += ["", f"**{heading}**", ""]
         lines += ["| | " + " | ".join(columns.values()) + " |", "|---" * (len(columns) + 1) + "|"]
         for label, sc, sims in rows:
@@ -196,7 +199,7 @@ def render_case(title: str, res: dict) -> list:
                 else:
                     against = None if label == REFERENCE else ref.get(k)
                     flag_vs = None if label == "prior" else prior.get(k)
-                    cells.append(cell(sc[k], against, flag_vs, BETTER.get(k, 0)))
+                    cells.append(cell(sc[k], against, flag_vs, better(k)))
             lines += [f"| {label_of(label, other)} | " + " | ".join(cells) + " |"]
     return lines
 
@@ -226,7 +229,7 @@ def render_sizes(title: str, by_ne: dict) -> list:
                     continue
                 against = None if label == REFERENCE else ref.get(k)
                 flag_vs = None if label == "prior" else prior.get(k)
-                cells.append(cell(sc[k], against, flag_vs, BETTER.get(k, 0)))
+                cells.append(cell(sc[k], against, flag_vs, better(k)))
             lines += [f"| {label_of(label, {})} | " + " | ".join(cells) + " |"]
     return lines
 
@@ -250,7 +253,7 @@ def render(results: dict) -> str:
     for case_name, by_ne in results.items():
         case = CASES[case_name]
         if NE in by_ne:
-            lines += render_case(f"## Case `{case_name}`: {case.n} x {case.n} cells", by_ne[NE])
+            lines += render_case(f"## Case `{case_name}`: {case.n} x {case.n} cells", by_ne[NE], case)
         if len(by_ne) > 1:
             lines += render_sizes(f"### Case `{case_name}`: by ensemble size", by_ne)
     return "\n".join(lines) + "\n"
@@ -332,11 +335,12 @@ def main():
 
         # Only the case's own number of truths is official; any other is a check
         if truths != CASES[case_name].truths:
-            print("\n".join(render_case(f"## Case `{case_name}`, {ne} members: this run", results)))
+            print("\n".join(render_case(f"## Case `{case_name}`, {ne} members: this run", results, CASES[case_name])))
             if old and old["meta"]["truths"] >= truths:
                 official = first_truths(old, truths, results["methods"])
                 if official["methods"]:
-                    print("\n".join(render_case(f"## Case `{case_name}`, {ne} members: official, on the same truths", official)))
+                    title = f"## Case `{case_name}`, {ne} members: official, on the same truths"
+                    print("\n".join(render_case(title, official, CASES[case_name])))
             print()
             continue
         res_file.parent.mkdir(exist_ok=True)

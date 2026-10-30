@@ -7,9 +7,7 @@ twin experiment can compute because it knows the truth.
 
 import numpy as np
 
-from cases import DATATYPES, FORECAST_STEPS, OBS_STEPS, SCALARS, Twin
-
-WWCT = [i for i, d in enumerate(DATATYPES) if d.startswith("WWCT")]
+from cases import Twin
 
 
 def crps(ensemble: np.ndarray, truth) -> np.ndarray:
@@ -32,7 +30,7 @@ def scores(states: dict, responses: np.ndarray, twin: Twin) -> dict:
     states : dict
         ``{variable: (size, ne)}``, the ensemble's unknowns.
     responses : ndarray
-        ``(ne, NSTEPS, len(DATATYPES))``, each member simulated to the end.
+        ``(ne, NSTEPS, len(datatypes))``, each member simulated to the end.
     twin : Twin
         The truth and its observations.
     """
@@ -41,14 +39,16 @@ def scores(states: dict, responses: np.ndarray, twin: Twin) -> dict:
     failed = np.isnan(responses).any(axis=(1, 2))
     responses = responses[~failed]
     out = {"failed": int(failed.sum())}
+    case = twin.case
+    wwct = [i for i, d in enumerate(case.datatypes) if d.startswith("WWCT")]
 
     # The history: mean squared normalized misfit, over members and observations
-    history = responses[:, np.array(OBS_STEPS) - 1]
+    history = responses[:, np.array(case.obs_steps) - 1]
     out["misfit"] = float(np.mean(((history - twin.obs) / twin.std) ** 2))
 
     # The forecast: RMS error of the ensemble mean's water cut, over the unseen steps
-    members = responses[:, np.array(FORECAST_STEPS) - 1][..., WWCT]
-    truth = twin.response[np.array(FORECAST_STEPS) - 1][:, WWCT]
+    members = responses[:, np.array(case.forecast_steps) - 1][..., wwct]
+    truth = twin.response[np.array(case.forecast_steps) - 1][:, wwct]
     out["forecast_wwct_rmse"] = float(np.sqrt(np.mean((members.mean(axis=0) - truth) ** 2)))
     out["forecast_wwct_crps"] = float(np.mean(crps(members.reshape(len(members), -1).T, truth.ravel())))
 
@@ -61,7 +61,7 @@ def scores(states: dict, responses: np.ndarray, twin: Twin) -> dict:
     out["logk_crps"] = float(crps(logk, true_logk).mean())
 
     # The scalars: error of the ensemble mean, and the spread left
-    for name in SCALARS:
+    for name in case.scalars:
         values = states[name][0]
         out[f"{name}_error"] = float(abs(values.mean() - twin.truth[name][0]))
         out[f"{name}_spread"] = float(values.std(ddof=1))

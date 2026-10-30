@@ -57,5 +57,7 @@ with other sizes (`sizes`) also gets a few scores tabled against the ensemble si
 ## Adding a method or a score
 
 - A method: an entry in `METHODS` of `methods.py`.
-- A score: a key in the output of `scores.scores`, and a column in `TABLES` of `run.py`; if it
-  has a better direction, an entry in `BETTER`, so that a posterior worse than the prior is flagged.
+- A score: a key in the output of `scores.scores`, and a column in `tables` of `run.py`. If lower
+  is better, its name ends in `_rmse`, `_error` or `_crps` (or see `better`), so that a posterior
+  worse than the prior is flagged.
+- A case: an entry in `CASES` of `cases.py`.
