@@ -20,8 +20,10 @@ replaces their entries and leaves the others'.
 
 import os
 
-for _var in ("OMP_NUM_THREADS", "MKL_NUM_THREADS", "OPENBLAS_NUM_THREADS"):
-    os.environ.setdefault(_var, "1")  # the parallelism is over experiments, not within them
+# The parallelism is over experiments, not within them: no BLAS threads, and no joblib pools
+# (EnIF's regressions would otherwise each start one the size of the machine)
+for _var in ("OMP_NUM_THREADS", "MKL_NUM_THREADS", "OPENBLAS_NUM_THREADS", "LOKY_MAX_CPU_COUNT"):
+    os.environ.setdefault(_var, "1")
 
 import argparse
 import contextlib
