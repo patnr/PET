@@ -718,7 +718,7 @@
     ]
    }
   },
-  "GN-EnRML (4 iterations), tuned: \u03b3 = 0.2, \u03b3 max = 1.0": {
+  "GN-EnRML (4 iterations, \u03b3 = 0.2, \u03b3 max = 1.0), tuned": {
    "commit": "4fca540",
    "date": "2026-10-30",
    "runs": [
@@ -1194,7 +1194,7 @@
     ]
    }
   },
-  "GN-EnRML (4 iterations), subspace2 analysis, tuned: \u03b3 = 0.4, \u03b3 max = 0.5": {
+  "GN-EnRML (4 iterations, \u03b3 = 0.4, \u03b3 max = 0.5), subspace2 analysis, tuned": {
    "commit": "4fca540",
    "date": "2026-10-30",
    "runs": [
@@ -1670,7 +1670,7 @@
     ]
    }
   },
-  "GN-EnRML (4 iterations), margis analysis, tuned: \u03b3 = 0.4, \u03b3 max = 0.5": {
+  "GN-EnRML (4 iterations, \u03b3 = 0.4, \u03b3 max = 0.5), margis analysis, tuned": {
    "commit": "4fca540",
    "date": "2026-10-30",
    "runs": [
@@ -2146,7 +2146,7 @@
     ]
    }
   },
-  "ES-MDA (4 steps, \u03b1 = 4), tuned: 4 steps, \u03b1 ratio 2": {
+  "ES-MDA (4 steps, \u03b1 = 15, 7.5, 3.75, 1.875), tuned": {
    "commit": "4fca540",
    "date": "2026-10-30",
    "runs": [
@@ -2622,7 +2622,7 @@
     ]
    }
   },
-  "ES-MDA (4 steps, \u03b1 = 4), enif analysis, tuned: 4 steps, \u03b1 ratio 2; neighbourhood 1": {
+  "ES-MDA (4 steps, \u03b1 = 15, 7.5, 3.75, 1.875), enif analysis (neighbourhood 1), tuned": {
    "commit": "4fca540",
    "date": "2026-10-30",
    "runs": [
@@ -3336,7 +3336,7 @@
     ]
    }
   },
-  "ES-MDA (4 steps, \u03b1 = 4), adaptive localization (3\u03c3 threshold), tuned: 2\u03c3 threshold": {
+  "ES-MDA (4 steps, \u03b1 = 4), adaptive localization (2\u03c3 threshold), tuned": {
    "commit": "4fca540",
    "date": "2026-10-30",
    "runs": [
@@ -3812,7 +3812,7 @@
     ]
    }
   },
-  "ES-MDA (4 steps, \u03b1 = 4), distance localization (Gaspari-Cohn, 300 m), tuned: 600 m": {
+  "ES-MDA (4 steps, \u03b1 = 4), distance localization (Gaspari-Cohn, 600 m), tuned": {
    "commit": "4fca540",
    "date": "2026-10-30",
    "runs": [

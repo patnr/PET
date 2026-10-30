@@ -10,6 +10,7 @@
   "points": [
    {
     "description": "\u03bb = 100, \u03bb factor = 5",
+    "label": "LM-EnRML (4 iterations, \u03bb = 100, \u03bb factor = 5), tuned",
     "dataassim": {
      "scheme": "lmenrml",
      "analysis": "approx",
@@ -46,6 +47,7 @@
    },
    {
     "description": "\u03bb = 1, \u03bb factor = 2",
+    "label": "LM-EnRML (4 iterations, \u03bb = 1, \u03bb factor = 2), tuned",
     "dataassim": {
      "scheme": "lmenrml",
      "analysis": "approx",
@@ -82,6 +84,7 @@
    },
    {
     "description": "\u03bb = 1, \u03bb factor = 5",
+    "label": "LM-EnRML (4 iterations, \u03bb = 1, \u03bb factor = 5), tuned",
     "dataassim": {
      "scheme": "lmenrml",
      "analysis": "approx",
@@ -118,6 +121,7 @@
    },
    {
     "description": "\u03bb = 1, \u03bb factor = 10",
+    "label": "LM-EnRML (4 iterations, \u03bb = 1, \u03bb factor = 10), tuned",
     "dataassim": {
      "scheme": "lmenrml",
      "analysis": "approx",
@@ -154,6 +158,7 @@
    },
    {
     "description": "\u03bb = 10, \u03bb factor = 2",
+    "label": "LM-EnRML (4 iterations, \u03bb = 10, \u03bb factor = 2), tuned",
     "dataassim": {
      "scheme": "lmenrml",
      "analysis": "approx",
@@ -190,6 +195,7 @@
    },
    {
     "description": "\u03bb = 10, \u03bb factor = 5",
+    "label": "LM-EnRML (4 iterations, \u03bb = 10, \u03bb factor = 5), tuned",
     "dataassim": {
      "scheme": "lmenrml",
      "analysis": "approx",
@@ -226,6 +232,7 @@
    },
    {
     "description": "\u03bb = 10, \u03bb factor = 10",
+    "label": "LM-EnRML (4 iterations, \u03bb = 10, \u03bb factor = 10), tuned",
     "dataassim": {
      "scheme": "lmenrml",
      "analysis": "approx",
@@ -262,6 +269,7 @@
    },
    {
     "description": "\u03bb = 100, \u03bb factor = 2",
+    "label": "LM-EnRML (4 iterations, \u03bb = 100, \u03bb factor = 2), tuned",
     "dataassim": {
      "scheme": "lmenrml",
      "analysis": "approx",
@@ -298,6 +306,7 @@
    },
    {
     "description": "\u03bb = 100, \u03bb factor = 10",
+    "label": "LM-EnRML (4 iterations, \u03bb = 100, \u03bb factor = 10), tuned",
     "dataassim": {
      "scheme": "lmenrml",
      "analysis": "approx",
@@ -334,6 +343,7 @@
    },
    {
     "description": "\u03bb = 1000, \u03bb factor = 2",
+    "label": "LM-EnRML (4 iterations, \u03bb = 1000, \u03bb factor = 2), tuned",
     "dataassim": {
      "scheme": "lmenrml",
      "analysis": "approx",
@@ -370,6 +380,7 @@
    },
    {
     "description": "\u03bb = 1000, \u03bb factor = 5",
+    "label": "LM-EnRML (4 iterations, \u03bb = 1000, \u03bb factor = 5), tuned",
     "dataassim": {
      "scheme": "lmenrml",
      "analysis": "approx",
@@ -406,6 +417,7 @@
    },
    {
     "description": "\u03bb = 1000, \u03bb factor = 10",
+    "label": "LM-EnRML (4 iterations, \u03bb = 1000, \u03bb factor = 10), tuned",
     "dataassim": {
      "scheme": "lmenrml",
      "analysis": "approx",
@@ -453,6 +465,7 @@
   "points": [
    {
     "description": "\u03b3 = 0.2, \u03b3 max = 0.5",
+    "label": "GN-EnRML (4 iterations, \u03b3 = 0.2, \u03b3 max = 0.5), tuned",
     "dataassim": {
      "scheme": "gnenrml",
      "analysis": "approx",
@@ -489,6 +502,7 @@
    },
    {
     "description": "\u03b3 = 0.1, \u03b3 max = 0.5",
+    "label": "GN-EnRML (4 iterations, \u03b3 = 0.1, \u03b3 max = 0.5), tuned",
     "dataassim": {
      "scheme": "gnenrml",
      "analysis": "approx",
@@ -525,6 +539,7 @@
    },
    {
     "description": "\u03b3 = 0.1, \u03b3 max = 1.0",
+    "label": "GN-EnRML (4 iterations, \u03b3 = 0.1, \u03b3 max = 1.0), tuned",
     "dataassim": {
      "scheme": "gnenrml",
      "analysis": "approx",
@@ -561,6 +576,7 @@
    },
    {
     "description": "\u03b3 = 0.2, \u03b3 max = 1.0",
+    "label": "GN-EnRML (4 iterations, \u03b3 = 0.2, \u03b3 max = 1.0), tuned",
     "dataassim": {
      "scheme": "gnenrml",
      "analysis": "approx",
@@ -597,6 +613,7 @@
    },
    {
     "description": "\u03b3 = 0.4, \u03b3 max = 0.5",
+    "label": "GN-EnRML (4 iterations, \u03b3 = 0.4, \u03b3 max = 0.5), tuned",
     "dataassim": {
      "scheme": "gnenrml",
      "analysis": "approx",
@@ -633,6 +650,7 @@
    },
    {
     "description": "\u03b3 = 0.4, \u03b3 max = 1.0",
+    "label": "GN-EnRML (4 iterations, \u03b3 = 0.4, \u03b3 max = 1.0), tuned",
     "dataassim": {
      "scheme": "gnenrml",
      "analysis": "approx",
@@ -680,6 +698,7 @@
   "points": [
    {
     "description": "\u03b3 = 0.2, \u03b3 max = 0.5",
+    "label": "GN-EnRML (4 iterations, \u03b3 = 0.2, \u03b3 max = 0.5), subspace2 analysis, tuned",
     "dataassim": {
      "scheme": "gnenrml",
      "analysis": "subspace2",
@@ -716,6 +735,7 @@
    },
    {
     "description": "\u03b3 = 0.1, \u03b3 max = 0.5",
+    "label": "GN-EnRML (4 iterations, \u03b3 = 0.1, \u03b3 max = 0.5), subspace2 analysis, tuned",
     "dataassim": {
      "scheme": "gnenrml",
      "analysis": "subspace2",
@@ -752,6 +772,7 @@
    },
    {
     "description": "\u03b3 = 0.1, \u03b3 max = 1.0",
+    "label": "GN-EnRML (4 iterations, \u03b3 = 0.1, \u03b3 max = 1.0), subspace2 analysis, tuned",
     "dataassim": {
      "scheme": "gnenrml",
      "analysis": "subspace2",
@@ -788,6 +809,7 @@
    },
    {
     "description": "\u03b3 = 0.2, \u03b3 max = 1.0",
+    "label": "GN-EnRML (4 iterations, \u03b3 = 0.2, \u03b3 max = 1.0), subspace2 analysis, tuned",
     "dataassim": {
      "scheme": "gnenrml",
      "analysis": "subspace2",
@@ -824,6 +846,7 @@
    },
    {
     "description": "\u03b3 = 0.4, \u03b3 max = 0.5",
+    "label": "GN-EnRML (4 iterations, \u03b3 = 0.4, \u03b3 max = 0.5), subspace2 analysis, tuned",
     "dataassim": {
      "scheme": "gnenrml",
      "analysis": "subspace2",
@@ -860,6 +883,7 @@
    },
    {
     "description": "\u03b3 = 0.4, \u03b3 max = 1.0",
+    "label": "GN-EnRML (4 iterations, \u03b3 = 0.4, \u03b3 max = 1.0), subspace2 analysis, tuned",
     "dataassim": {
      "scheme": "gnenrml",
      "analysis": "subspace2",
@@ -907,6 +931,7 @@
   "points": [
    {
     "description": "\u03b3 = 0.2, \u03b3 max = 0.5",
+    "label": "GN-EnRML (4 iterations, \u03b3 = 0.2, \u03b3 max = 0.5), margis analysis, tuned",
     "dataassim": {
      "scheme": "gnenrml",
      "analysis": "margis",
@@ -943,6 +968,7 @@
    },
    {
     "description": "\u03b3 = 0.1, \u03b3 max = 0.5",
+    "label": "GN-EnRML (4 iterations, \u03b3 = 0.1, \u03b3 max = 0.5), margis analysis, tuned",
     "dataassim": {
      "scheme": "gnenrml",
      "analysis": "margis",
@@ -979,6 +1005,7 @@
    },
    {
     "description": "\u03b3 = 0.1, \u03b3 max = 1.0",
+    "label": "GN-EnRML (4 iterations, \u03b3 = 0.1, \u03b3 max = 1.0), margis analysis, tuned",
     "dataassim": {
      "scheme": "gnenrml",
      "analysis": "margis",
@@ -1015,6 +1042,7 @@
    },
    {
     "description": "\u03b3 = 0.2, \u03b3 max = 1.0",
+    "label": "GN-EnRML (4 iterations, \u03b3 = 0.2, \u03b3 max = 1.0), margis analysis, tuned",
     "dataassim": {
      "scheme": "gnenrml",
      "analysis": "margis",
@@ -1051,6 +1079,7 @@
    },
    {
     "description": "\u03b3 = 0.4, \u03b3 max = 0.5",
+    "label": "GN-EnRML (4 iterations, \u03b3 = 0.4, \u03b3 max = 0.5), margis analysis, tuned",
     "dataassim": {
      "scheme": "gnenrml",
      "analysis": "margis",
@@ -1087,6 +1116,7 @@
    },
    {
     "description": "\u03b3 = 0.4, \u03b3 max = 1.0",
+    "label": "GN-EnRML (4 iterations, \u03b3 = 0.4, \u03b3 max = 1.0), margis analysis, tuned",
     "dataassim": {
      "scheme": "gnenrml",
      "analysis": "margis",
@@ -1134,6 +1164,7 @@
   "points": [
    {
     "description": "4 steps, \u03b1 ratio 1",
+    "label": "ES-MDA (4 steps, \u03b1 = 4), tuned",
     "dataassim": {
      "scheme": "esmda",
      "analysis": "approx",
@@ -1173,6 +1204,7 @@
    },
    {
     "description": "2 steps, \u03b1 ratio 1",
+    "label": "ES-MDA (2 steps, \u03b1 = 2), tuned",
     "dataassim": {
      "scheme": "esmda",
      "analysis": "approx",
@@ -1210,6 +1242,7 @@
    },
    {
     "description": "2 steps, \u03b1 ratio 2",
+    "label": "ES-MDA (2 steps, \u03b1 = 3, 1.5), tuned",
     "dataassim": {
      "scheme": "esmda",
      "analysis": "approx",
@@ -1247,6 +1280,7 @@
    },
    {
     "description": "3 steps, \u03b1 ratio 1",
+    "label": "ES-MDA (3 steps, \u03b1 = 3), tuned",
     "dataassim": {
      "scheme": "esmda",
      "analysis": "approx",
@@ -1285,6 +1319,7 @@
    },
    {
     "description": "3 steps, \u03b1 ratio 2",
+    "label": "ES-MDA (3 steps, \u03b1 = 7, 3.5, 1.75), tuned",
     "dataassim": {
      "scheme": "esmda",
      "analysis": "approx",
@@ -1323,6 +1358,7 @@
    },
    {
     "description": "4 steps, \u03b1 ratio 2",
+    "label": "ES-MDA (4 steps, \u03b1 = 15, 7.5, 3.75, 1.875), tuned",
     "dataassim": {
      "scheme": "esmda",
      "analysis": "approx",
@@ -1373,6 +1409,7 @@
   "points": [
    {
     "description": "4 steps, \u03b1 ratio 1; neighbourhood 2",
+    "label": "ES-MDA (4 steps, \u03b1 = 4), enif analysis (neighbourhood 2), tuned",
     "dataassim": {
      "scheme": "esmda",
      "analysis": "enif",
@@ -1415,6 +1452,7 @@
    },
    {
     "description": "4 steps, \u03b1 ratio 1; neighbourhood 1",
+    "label": "ES-MDA (4 steps, \u03b1 = 4), enif analysis (neighbourhood 1), tuned",
     "dataassim": {
      "scheme": "esmda",
      "analysis": "enif",
@@ -1457,6 +1495,7 @@
    },
    {
     "description": "4 steps, \u03b1 ratio 1; neighbourhood 3",
+    "label": "ES-MDA (4 steps, \u03b1 = 4), enif analysis (neighbourhood 3), tuned",
     "dataassim": {
      "scheme": "esmda",
      "analysis": "enif",
@@ -1499,6 +1538,7 @@
    },
    {
     "description": "2 steps, \u03b1 ratio 1; neighbourhood 2",
+    "label": "ES-MDA (2 steps, \u03b1 = 2), enif analysis (neighbourhood 2), tuned",
     "dataassim": {
      "scheme": "esmda",
      "analysis": "enif",
@@ -1539,6 +1579,7 @@
    },
    {
     "description": "2 steps, \u03b1 ratio 1; neighbourhood 1",
+    "label": "ES-MDA (2 steps, \u03b1 = 2), enif analysis (neighbourhood 1), tuned",
     "dataassim": {
      "scheme": "esmda",
      "analysis": "enif",
@@ -1579,6 +1620,7 @@
    },
    {
     "description": "2 steps, \u03b1 ratio 1; neighbourhood 3",
+    "label": "ES-MDA (2 steps, \u03b1 = 2), enif analysis (neighbourhood 3), tuned",
     "dataassim": {
      "scheme": "esmda",
      "analysis": "enif",
@@ -1619,6 +1661,7 @@
    },
    {
     "description": "2 steps, \u03b1 ratio 2; neighbourhood 2",
+    "label": "ES-MDA (2 steps, \u03b1 = 3, 1.5), enif analysis (neighbourhood 2), tuned",
     "dataassim": {
      "scheme": "esmda",
      "analysis": "enif",
@@ -1659,6 +1702,7 @@
    },
    {
     "description": "2 steps, \u03b1 ratio 2; neighbourhood 1",
+    "label": "ES-MDA (2 steps, \u03b1 = 3, 1.5), enif analysis (neighbourhood 1), tuned",
     "dataassim": {
      "scheme": "esmda",
      "analysis": "enif",
@@ -1699,6 +1743,7 @@
    },
    {
     "description": "2 steps, \u03b1 ratio 2; neighbourhood 3",
+    "label": "ES-MDA (2 steps, \u03b1 = 3, 1.5), enif analysis (neighbourhood 3), tuned",
     "dataassim": {
      "scheme": "esmda",
      "analysis": "enif",
@@ -1739,6 +1784,7 @@
    },
    {
     "description": "3 steps, \u03b1 ratio 1; neighbourhood 2",
+    "label": "ES-MDA (3 steps, \u03b1 = 3), enif analysis (neighbourhood 2), tuned",
     "dataassim": {
      "scheme": "esmda",
      "analysis": "enif",
@@ -1780,6 +1826,7 @@
    },
    {
     "description": "3 steps, \u03b1 ratio 1; neighbourhood 1",
+    "label": "ES-MDA (3 steps, \u03b1 = 3), enif analysis (neighbourhood 1), tuned",
     "dataassim": {
      "scheme": "esmda",
      "analysis": "enif",
@@ -1821,6 +1868,7 @@
    },
    {
     "description": "3 steps, \u03b1 ratio 1; neighbourhood 3",
+    "label": "ES-MDA (3 steps, \u03b1 = 3), enif analysis (neighbourhood 3), tuned",
     "dataassim": {
      "scheme": "esmda",
      "analysis": "enif",
@@ -1862,6 +1910,7 @@
    },
    {
     "description": "3 steps, \u03b1 ratio 2; neighbourhood 2",
+    "label": "ES-MDA (3 steps, \u03b1 = 7, 3.5, 1.75), enif analysis (neighbourhood 2), tuned",
     "dataassim": {
      "scheme": "esmda",
      "analysis": "enif",
@@ -1903,6 +1952,7 @@
    },
    {
     "description": "3 steps, \u03b1 ratio 2; neighbourhood 1",
+    "label": "ES-MDA (3 steps, \u03b1 = 7, 3.5, 1.75), enif analysis (neighbourhood 1), tuned",
     "dataassim": {
      "scheme": "esmda",
      "analysis": "enif",
@@ -1944,6 +1994,7 @@
    },
    {
     "description": "3 steps, \u03b1 ratio 2; neighbourhood 3",
+    "label": "ES-MDA (3 steps, \u03b1 = 7, 3.5, 1.75), enif analysis (neighbourhood 3), tuned",
     "dataassim": {
      "scheme": "esmda",
      "analysis": "enif",
@@ -1985,6 +2036,7 @@
    },
    {
     "description": "4 steps, \u03b1 ratio 2; neighbourhood 2",
+    "label": "ES-MDA (4 steps, \u03b1 = 15, 7.5, 3.75, 1.875), enif analysis (neighbourhood 2), tuned",
     "dataassim": {
      "scheme": "esmda",
      "analysis": "enif",
@@ -2027,6 +2079,7 @@
    },
    {
     "description": "4 steps, \u03b1 ratio 2; neighbourhood 1",
+    "label": "ES-MDA (4 steps, \u03b1 = 15, 7.5, 3.75, 1.875), enif analysis (neighbourhood 1), tuned",
     "dataassim": {
      "scheme": "esmda",
      "analysis": "enif",
@@ -2069,6 +2122,7 @@
    },
    {
     "description": "4 steps, \u03b1 ratio 2; neighbourhood 3",
+    "label": "ES-MDA (4 steps, \u03b1 = 15, 7.5, 3.75, 1.875), enif analysis (neighbourhood 3), tuned",
     "dataassim": {
      "scheme": "esmda",
      "analysis": "enif",
@@ -2122,6 +2176,7 @@
   "points": [
    {
     "description": "3\u03c3 threshold",
+    "label": "ES-MDA (4 steps, \u03b1 = 4), adaptive localization (3\u03c3 threshold), tuned",
     "dataassim": {
      "scheme": "esmda",
      "analysis": "approx",
@@ -2167,6 +2222,7 @@
    },
    {
     "description": "2\u03c3 threshold",
+    "label": "ES-MDA (4 steps, \u03b1 = 4), adaptive localization (2\u03c3 threshold), tuned",
     "dataassim": {
      "scheme": "esmda",
      "analysis": "approx",
@@ -2212,6 +2268,7 @@
    },
    {
     "description": "4\u03c3 threshold",
+    "label": "ES-MDA (4 steps, \u03b1 = 4), adaptive localization (4\u03c3 threshold), tuned",
     "dataassim": {
      "scheme": "esmda",
      "analysis": "approx",
@@ -2257,6 +2314,7 @@
    },
    {
     "description": "5\u03c3 threshold",
+    "label": "ES-MDA (4 steps, \u03b1 = 4), adaptive localization (5\u03c3 threshold), tuned",
     "dataassim": {
      "scheme": "esmda",
      "analysis": "approx",
@@ -2313,6 +2371,7 @@
   "points": [
    {
     "description": "300 m",
+    "label": "ES-MDA (4 steps, \u03b1 = 4), distance localization (Gaspari-Cohn, 300 m), tuned",
     "dataassim": {
      "scheme": "esmda",
      "analysis": "approx",
@@ -2360,6 +2419,7 @@
    },
    {
     "description": "150 m",
+    "label": "ES-MDA (4 steps, \u03b1 = 4), distance localization (Gaspari-Cohn, 150 m), tuned",
     "dataassim": {
      "scheme": "esmda",
      "analysis": "approx",
@@ -2407,6 +2467,7 @@
    },
    {
     "description": "450 m",
+    "label": "ES-MDA (4 steps, \u03b1 = 4), distance localization (Gaspari-Cohn, 450 m), tuned",
     "dataassim": {
      "scheme": "esmda",
      "analysis": "approx",
@@ -2454,6 +2515,7 @@
    },
    {
     "description": "600 m",
+    "label": "ES-MDA (4 steps, \u03b1 = 4), distance localization (Gaspari-Cohn, 600 m), tuned",
     "dataassim": {
      "scheme": "esmda",
      "analysis": "approx",

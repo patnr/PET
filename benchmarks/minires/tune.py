@@ -61,20 +61,32 @@ def default_first(default, values) -> list:
     return [default] + [v for v in values if v != default]
 
 
-# The grids: {label of a method: {option: [(description, settings to merge into its dataassim)]}}.
-# The first of each option's values is the default: PET's, or the method's in methods.py.
-SCHEDULES = [
-    (f"{k} steps, α ratio {r}", mda(k, r))
-    for k, r in default_first((4, 1), itertools.product((2, 3, 4), (1, 2)))
-]
+def schedule(k: int, r: float) -> tuple:
+    alphas = mda(k, r)["mda"]["inflation_param"]
+    shown = f"{alphas[0]:g}" if r == 1 else ", ".join(f"{a:g}" for a in alphas)
+    return (f"{k} steps, α ratio {r}", mda(k, r), ("4 steps, α = 4", f"{k} steps, α = {shown}"))
+
+
+# The grids: {label of a method: {option: [(description, settings to merge into its dataassim,
+# (the part of the method's label they change, and what to)]}}. The first of each option's values
+# is the default: PET's, or the method's in methods.py.
+SCHEDULES = [schedule(k, r) for k, r in default_first((4, 1), itertools.product((2, 3, 4), (1, 2)))]
 STEP_LENGTHS = [
-    (f"γ = {g}, γ max = {m}", iteration(gamma=g, gamma_max=m))
+    (
+        f"γ = {g}, γ max = {m}",
+        iteration(gamma=g, gamma_max=m),
+        ("(4 iterations)", f"(4 iterations, γ = {g}, γ max = {m})"),
+    )
     for g, m in default_first((0.2, 0.5), itertools.product((0.1, 0.2, 0.4), (0.5, 1.0)))
 ]
 GRIDS = {
     "LM-EnRML (4 iterations)": {
         "damping": [
-            (f"λ = {lam}, λ factor = {f}", iteration(**{"lambda": lam, "lambda_factor": f}))
+            (
+                f"λ = {lam}, λ factor = {f}",
+                iteration(**{"lambda": lam, "lambda_factor": f}),
+                ("(4 iterations)", f"(4 iterations, λ = {lam}, λ factor = {f})"),
+            )
             for lam, f in default_first((100, 5), itertools.product((1, 10, 100, 1000), (2, 5, 10)))
         ],
     },
@@ -84,13 +96,26 @@ GRIDS = {
     "ES-MDA (4 steps, α = 4)": {"schedule": SCHEDULES},
     "ES-MDA (4 steps, α = 4), enif analysis": {
         "schedule": SCHEDULES,
-        "neighbourhood": [(f"neighbourhood {k}", {"enif": {"neighbourhood_expansion": k}}) for k in (2, 1, 3)],
+        "neighbourhood": [
+            (
+                f"neighbourhood {k}",
+                {"enif": {"neighbourhood_expansion": k}},
+                ("enif analysis", f"enif analysis (neighbourhood {k})"),
+            )
+            for k in (2, 1, 3)
+        ],
     },
     "ES-MDA (4 steps, α = 4), adaptive localization (3σ threshold)": {
-        "cutoff": [(f"{c}σ threshold", {"localization": {"cutoff": float(c)}}) for c in (3, 2, 4, 5)],
+        "cutoff": [
+            (f"{c}σ threshold", {"localization": {"cutoff": float(c)}}, ("(3σ threshold)", f"({c}σ threshold)"))
+            for c in (3, 2, 4, 5)
+        ],
     },
     "ES-MDA (4 steps, α = 4), distance localization (Gaspari-Cohn, 300 m)": {
-        "radius": [(f"{r} m", {"localization": {"radius": float(r)}}) for r in (300, 150, 450, 600)],
+        "radius": [
+            (f"{r} m", {"localization": {"radius": float(r)}}, ("300 m", f"{r} m"))
+            for r in (300, 150, 450, 600)
+        ],
     },
 }
 
@@ -104,13 +129,16 @@ def merge(base: dict, extra: dict) -> dict:
 
 
 def points(method: dict, grid: dict) -> list:
-    """Each point of the grid: its description, and the method's settings at it. The first is the default."""
+    """Each point of the grid: its description, the method's settings at it, and the label of its
+    tuned row, should it be chosen. The first is the default."""
     out = []
     for combo in itertools.product(*grid.values()):
-        settings = method["dataassim"]
-        for _, extra in combo:
+        settings, label = method["dataassim"], method["label"]
+        for _, extra, (old, new) in combo:
             settings = merge(settings, extra)
-        out.append(("; ".join(d for d, _ in combo), settings))
+            assert old in label, (old, label)
+            label = label.replace(old, new, 1)
+        out.append(("; ".join(d for d, _, _ in combo), settings, f"{label}, tuned"))
     return out
 
 
@@ -127,7 +155,7 @@ def main():
     jobs = [(lab, k, i) for lab in labels for k in range(len(grid_points[lab])) for i in range(args.truths)]
     print(f"{len(jobs)} experiments: {sum(map(len, grid_points.values()))} settings x {args.truths} truths", flush=True)
     with ProcessPoolExecutor(args.workers, initializer=logging.disable, initargs=(logging.WARNING,)) as pool:
-        method_at = lambda lab, k: {"label": lab, "dataassim": grid_points[lab][k][1]}  # noqa: E731
+        method_at = lambda lab, k: {"label": grid_points[lab][k][2], "dataassim": grid_points[lab][k][1]}  # noqa: E731
         done = list(pool.map(experiment, *zip(*[(CASE, method_at(lab, k), OFFSET + i, NE) for lab, k, i in jobs])))
 
     out_file = HERE / "results" / "tuning.json"
@@ -145,11 +173,11 @@ def main():
         tuning[lab] = {
             "commit": commit(), "case": CASE, "ne": NE, "truths": TRUTHS, "objective": OBJECTIVE,
             "default": default, "chosen": chosen,
-            "points": [{"description": desc, "dataassim": s, "runs": r, OBJECTIVE: sc}
-                       for (desc, s), r, sc in zip(grid_points[lab], runs, scores)],
+            "points": [{"description": desc, "label": tuned_label, "dataassim": s, "runs": r, OBJECTIVE: sc}
+                       for (desc, s, tuned_label), r, sc in zip(grid_points[lab], runs, scores)],
         }
         print(f"\n{lab}" + ("" if chosen != default else "  (the default stands)"))
-        for k, (desc, _) in enumerate(grid_points[lab]):
+        for k, (desc, _, _) in enumerate(grid_points[lab]):
             d = np.array(scores[k]) - np.array(scores[default])
             mark = " <- default" * (k == default) + " <- chosen" * (k == chosen and k != default)
             mark += " (over budget)" * (k not in affordable)

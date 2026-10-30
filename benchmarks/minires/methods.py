@@ -87,7 +87,7 @@ def tuned(methods: list) -> list:
         t = tuning.get(m["label"])
         if t and t["chosen"] != t["default"]:
             point = t["points"][t["chosen"]]
-            out.append({"label": f"{m['label']}, tuned: {point['description']}", "dataassim": point["dataassim"]})
+            out.append({"label": point["label"], "dataassim": point["dataassim"]})
     return out
 
 
