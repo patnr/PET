@@ -17,6 +17,8 @@ The base case.
 
 20 truths, 50 members; history of 16 of 40 steps, observed at steps [4, 8, 12, 16]. PET at `4fca540`, 2026-10-30.
 
+**Findings.** ES-MDA and LM-EnRML fit the data to about the noise level (misfit about 2) and forecast best of the defaults (CRPS 0.044 and 0.049, against ES's 0.063); GN-EnRML at its default step lengths barely improves on ES. The localizations and EnIF fit the data less closely, but keep more spread and score best on the field (logK CRPS about 0.405). Tuning helps the localizations most: distance localization at 600 m forecasts as well as ES-MDA, and scores better on the field.
+
 **The data and its forecast**
 
 | | misfit | RMSE forecast WWCT | CRPS forecast WWCT | failed members | simulations |
@@ -89,6 +91,8 @@ The base case.
 ### Case `coarse`: by ensemble size
 
 20 truths. The ± are against ES at the same size.
+
+**Findings.** At 20 members, ES, LM-EnRML, GN-EnRML (but with margIS) and ES-MDA collapse (logK spread 0.27 to 0.44, against the prior's 0.79) and end up worse than the prior on the field; EnIF and the default localizations do not. Distance localization forecasts almost as well at 20 members as at 100 (CRPS 0.053 and 0.050), while ES needs 100 members to match it. At 100 members, the methods differ little.
 
 **CRPS forecast WWCT**
 
@@ -165,6 +169,8 @@ The base case, at twice the resolution.
 
 8 truths, 50 members; history of 16 of 40 steps, observed at steps [4, 8, 12, 16]. PET at `4fca540`, 2026-10-30.
 
+**Findings.** Much as `coarse`: the resolution changes little, except that EnIF fits the data worse (misfit 30, against 13). ES-MDA (tuned: 0.038) and distance localization at 600 m (0.040) forecast best. With only 8 truths, few of the differences between the iterating methods are resolved.
+
 **The data and its forecast**
 
 | | misfit | RMSE forecast WWCT | CRPS forecast WWCT | failed members | simulations |
@@ -239,6 +245,8 @@ The base case, at twice the resolution.
 Oil 50 times as viscous as water: the water breaks through early and abruptly, so the history is strongly nonlinear in the permeability. Where iterating should pay.
 
 20 truths, 50 members; history of 16 of 40 steps, observed at steps [4, 8, 12, 16]. PET at `4fca540`, 2026-10-30.
+
+**Findings.** Iterating pays most here: LM-EnRML, ES-MDA and GN-EnRML at γ max = 1 forecast about a third better than ES (CRPS 0.029, 0.028 and 0.028, against 0.041), while GN-EnRML at its default step lengths does no better than ES. Distance localization at 300 m now and then makes the fit far worse than the prior's (misfit 200 ± 100, from a few truths); at the tuned 600 m it does not.
 
 **The data and its forecast**
 
@@ -315,6 +323,8 @@ Nine producers and four injectors, on a field of half the correlation range (150
 
 20 truths, 50 members; history of 16 of 40 steps, observed at steps [4, 8, 12, 16]. PET at `4fca540`, 2026-10-30.
 
+**Findings.** Without localization or EnIF, every scheme ends up worse than the prior on the field, though it fits the data. Of those with one, the adaptive localizations forecast worse than ES, while distance localization at 300 m forecasts best of all (CRPS 0.033, against ES's 0.056). The tuning's 600 m, chosen on `coarse`, is too wide here, where the prior's range is 150 m: it forecasts no better, and is worse than the prior on the field.
+
 **The data and its forecast**
 
 | | misfit | RMSE forecast WWCT | CRPS forecast WWCT | failed members | simulations |
@@ -390,6 +400,8 @@ Every step of the history assimilated: 144 data for 50 members. Where the analys
 
 20 truths, 50 members; history of 16 of 40 steps, observed at steps [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16]. PET at `4fca540`, 2026-10-30.
 
+**Findings.** Assimilating every step changes little from `coarse`: subspace2 and margIS forecast no better than GN-EnRML does (CRPS 0.059, 0.060 and 0.058). margIS, EnIF and distance localization keep more spread, and score best on the field (logK CRPS about 0.40).
+
 **The data and its forecast**
 
 | | misfit | RMSE forecast WWCT | CRPS forecast WWCT | failed members | simulations |
@@ -464,6 +476,8 @@ Every step of the history assimilated: 144 data for 50 members. Where the analys
 Only the first 6 steps observed, before any water breaks through: rates and pressures, nearly linear in the permeability. Where a single update should do.
 
 20 truths, 50 members; history of 6 of 40 steps, observed at steps [2, 4, 6]. PET at `4fca540`, 2026-10-30.
+
+**Findings.** Before the water breaks through, a single update does about as well as any: LM-EnRML and GN-EnRML forecast no better than ES (CRPS 0.076, against 0.075), and ES-MDA only slightly better (0.072), each at 2.5 times the simulations. Little is learnt about the forecast by any method (the prior's CRPS is 0.131).
 
 **The data and its forecast**
 

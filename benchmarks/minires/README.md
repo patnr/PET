@@ -28,6 +28,7 @@ same truths, the same scores.
 | `run.py` | Runs the methods on the cases, and generates `RESULTS.md`. |
 | `tune.py` | Tunes the methods' settings, on twin experiments of its own, into `results/tuning.json`; `methods.py` adds a tuned row for each method whose default it beat. |
 | `results/` | The scores of each case and ensemble size (`<case>-ne<ne>.json`), per method and truth, with the PET commit each method was run at; `RESULTS.md` is generated from them. |
+| `findings.py` | What the tables show, a few sentences per heading of `RESULTS.md`. Written by hand; check them when the results are redone. |
 | `RESULTS.md` | The tables. Generated; do not edit by hand. |
 
 `tests/test_benchmark_minires.py` checks that each method still runs, on one tiny experiment.

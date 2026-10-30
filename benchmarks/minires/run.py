@@ -40,6 +40,7 @@ import numpy as np
 import pandas as pd
 
 from cases import CASES, NE, NSTEPS, Case, twin
+from findings import FINDINGS
 from input_output.config import normalize
 from methods import COMMON, METHODS, REFERENCE
 from pipt.update_schemes.registry import get_scheme
@@ -170,7 +171,7 @@ def label_of(label: str, other: dict) -> str:
     return label + (" (reference)" if label == REFERENCE else "") + (f" [`{other[label]}`]" if label in other else "")
 
 
-def render_case(title: str, res: dict, case: Case) -> list:
+def render_case(title: str, res: dict, case: Case, findings: str = "") -> list:
     meta, runs = res["meta"], res["methods"]
     prior = next(iter(runs.values()))["prior"]  # the same for every method: the same seeds
     ref = runs[REFERENCE]["posterior"]
@@ -183,6 +184,7 @@ def render_case(title: str, res: dict, case: Case) -> list:
         f"{meta['truths']} truths, {meta['ne']} members; history of {case.history} of {NSTEPS} steps, "
         f"observed at steps {case.obs_steps}. PET at `{usual}`, {date_}"
         + (", except the rows marked with another commit." if other else "."),
+        *(["", f"**Findings.** {findings}"] if findings else []),
     ]
     rows = [("prior", prior, None)] + [(label, r["posterior"], r["runs"]) for label, r in runs.items()]
     for heading, columns in tables(case).items():
@@ -209,11 +211,12 @@ def render_case(title: str, res: dict, case: Case) -> list:
 BY_SIZE = {"forecast_wwct_crps": "CRPS forecast WWCT", "logk_crps": "logK CRPS", "logk_spread": "logK spread"}
 
 
-def render_sizes(title: str, by_ne: dict) -> list:
+def render_sizes(title: str, by_ne: dict, findings: str = "") -> list:
     """A few scores of each method, at each ensemble size: ``by_ne`` is ``{ne: results}``."""
     sizes = sorted(by_ne)
     truths = {by_ne[ne]["meta"]["truths"] for ne in sizes}
     lines = ["", title, "", f"{', '.join(map(str, sorted(truths)))} truths. The ± are against ES at the same size."]
+    lines += ["", f"**Findings.** {findings}"] if findings else []
     labels = [m["label"] for m in METHODS if any(m["label"] in by_ne[ne]["methods"] for ne in sizes)]
     for k, heading in BY_SIZE.items():
         lines += ["", f"**{heading}**", ""]
@@ -254,9 +257,10 @@ def render(results: dict) -> str:
     for case_name, by_ne in results.items():
         case = CASES[case_name]
         if NE in by_ne:
-            lines += render_case(f"## Case `{case_name}`: {case.n} x {case.n} cells", by_ne[NE], case)
+            title = f"## Case `{case_name}`: {case.n} x {case.n} cells"
+            lines += render_case(title, by_ne[NE], case, FINDINGS.get(case_name, ""))
         if len(by_ne) > 1:
-            lines += render_sizes(f"### Case `{case_name}`: by ensemble size", by_ne)
+            lines += render_sizes(f"### Case `{case_name}`: by ensemble size", by_ne, FINDINGS.get(f"{case_name}/sizes", ""))
     return "\n".join(lines) + "\n"
 
 
