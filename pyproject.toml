@@ -109,4 +109,5 @@ ignore = [
 "src/misc/ecl.py" = ["E722", "E741"]
 "src/misc/grid/sector.py" = ["E722", "E741"]
 "benchmarks/minires/run.py" = ["E402"]  # pins the BLAS threads before numpy is imported
+"benchmarks/minires/tune.py" = ["E402"]  # likewise
 "src/misc/grid/unstruct.py" = ["F841"]  # untested legacy grid parser; allocations look WIP, not dead code
