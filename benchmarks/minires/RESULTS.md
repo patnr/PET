@@ -63,6 +63,58 @@ methods and their settings, and `scores.py` for what is scored.
 | ES-MDA (4 steps, α = 4), adaptive localization (3σ threshold) | 0.0288 ± 0.004 | 0.0316 ± 0.0005 | 0.021 ± 0.003 |
 | ES-MDA (4 steps, α = 4), distance localization (Gaspari-Cohn, 300 m) | 0.0303 ± 0.003 | 0.0236 ± 0.0004 | 0.0224 ± 0.002 |
 
+### Case `coarse`: by ensemble size
+
+20 truths. The ± are against ES at the same size.
+
+**CRPS forecast WWCT**
+
+| | 20 members | 50 members | 100 members |
+|---|---|---|---|
+| prior | 0.144 ± 0.01 | 0.141 ± 0.01 | 0.136 ± 0.01 |
+| ES (one update) (reference) | 0.0991 | 0.0626 | 0.0522 |
+| LM-EnRML (4 iterations) | 0.0558 ± 0.008 | 0.049 ± 0.007 | 0.0431 ± 0.007 |
+| GN-EnRML (4 iterations) | 0.0672 ± 0.008 | 0.0611 ± 0.009 | 0.0523 ± 0.008 |
+| GN-EnRML (4 iterations), subspace2 analysis | 0.0665 ± 0.008 | 0.0638 ± 0.009 | 0.0531 ± 0.008 |
+| GN-EnRML (4 iterations), margis analysis | 0.0703 ± 0.009 | 0.0635 ± 0.009 | 0.0529 ± 0.008 |
+| ES-MDA (4 steps, α = 4) | 0.0682 ± 0.006 | 0.0443 ± 0.005 | 0.0417 ± 0.003 |
+| ES-MDA (4 steps, α = 4), enif analysis | 0.0898 ± 0.008 | 0.062 ± 0.007 | 0.0523 ± 0.008 |
+| ES-MDA (4 steps, α = 4), adaptive localization (universal threshold) | 0.138 ± 0.01 | 0.0831 ± 0.01 | 0.0604 ± 0.009 |
+| ES-MDA (4 steps, α = 4), adaptive localization (3σ threshold) | 0.123 ± 0.01 | 0.0659 ± 0.009 | 0.0498 ± 0.006 |
+| ES-MDA (4 steps, α = 4), distance localization (Gaspari-Cohn, 300 m) | 0.0528 ± 0.008 | 0.0526 ± 0.008 | 0.0504 ± 0.008 |
+
+**logK CRPS**
+
+| | 20 members | 50 members | 100 members |
+|---|---|---|---|
+| prior | 0.46 ± 0.02 | 0.449 ± 0.02 | 0.446 ± 0.008 |
+| ES (one update) (reference) | 0.652 ⚠ | 0.457 | 0.415 |
+| LM-EnRML (4 iterations) | 0.498 ± 0.02 ⚠ | 0.422 ± 0.01 | 0.407 ± 0.004 |
+| GN-EnRML (4 iterations) | 0.523 ± 0.02 ⚠ | 0.421 ± 0.009 | 0.406 ± 0.004 |
+| GN-EnRML (4 iterations), subspace2 analysis | 0.501 ± 0.02 ⚠ | 0.42 ± 0.01 | 0.403 ± 0.004 |
+| GN-EnRML (4 iterations), margis analysis | 0.458 ± 0.02 | 0.419 ± 0.01 | 0.403 ± 0.004 |
+| ES-MDA (4 steps, α = 4) | 0.607 ± 0.01 ⚠ | 0.447 ± 0.007 | 0.421 ± 0.005 |
+| ES-MDA (4 steps, α = 4), enif analysis | 0.423 ± 0.03 | 0.405 ± 0.01 | 0.4 ± 0.008 |
+| ES-MDA (4 steps, α = 4), adaptive localization (universal threshold) | 0.461 ± 0.02 | 0.434 ± 0.02 | 0.418 ± 0.007 |
+| ES-MDA (4 steps, α = 4), adaptive localization (3σ threshold) | 0.458 ± 0.02 | 0.429 ± 0.01 | 0.415 ± 0.006 |
+| ES-MDA (4 steps, α = 4), distance localization (Gaspari-Cohn, 300 m) | 0.433 ± 0.03 | 0.406 ± 0.01 | 0.402 ± 0.005 |
+
+**logK spread**
+
+| | 20 members | 50 members | 100 members |
+|---|---|---|---|
+| prior | 0.793 ± 0.006 | 0.802 ± 0.002 | 0.802 ± 0.002 |
+| ES (one update) (reference) | 0.417 | 0.593 | 0.642 |
+| LM-EnRML (4 iterations) | 0.382 ± 0.008 | 0.547 ± 0.004 | 0.61 ± 0.003 |
+| GN-EnRML (4 iterations) | 0.39 ± 0.005 | 0.566 ± 0.002 | 0.625 ± 0.001 |
+| GN-EnRML (4 iterations), subspace2 analysis | 0.44 ± 0.005 | 0.588 ± 0.002 | 0.637 ± 0.001 |
+| GN-EnRML (4 iterations), margis analysis | 0.503 ± 0.004 | 0.605 ± 0.002 | 0.644 ± 0.002 |
+| ES-MDA (4 steps, α = 4) | 0.273 ± 0.009 | 0.494 ± 0.005 | 0.582 ± 0.003 |
+| ES-MDA (4 steps, α = 4), enif analysis | 0.696 ± 0.005 | 0.709 ± 0.002 | 0.719 ± 0.002 |
+| ES-MDA (4 steps, α = 4), adaptive localization (universal threshold) | 0.78 ± 0.006 | 0.744 ± 0.002 | 0.722 ± 0.002 |
+| ES-MDA (4 steps, α = 4), adaptive localization (3σ threshold) | 0.754 ± 0.007 | 0.719 ± 0.002 | 0.703 ± 0.002 |
+| ES-MDA (4 steps, α = 4), distance localization (Gaspari-Cohn, 300 m) | 0.642 ± 0.005 | 0.678 ± 0.002 | 0.692 ± 0.002 |
+
 ## Case `fine`: 50 x 50 cells
 
 8 truths, 50 members; history of 16 of 40 steps, observed at steps [4, 8, 12, 16]. PET at `4fca540`, 2026-10-29.
