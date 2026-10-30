@@ -13,6 +13,8 @@ methods and their settings, and `scores.py` for what is scored.
 
 ## Case `coarse`: 25 x 25 cells
 
+The base case.
+
 20 truths, 50 members; history of 16 of 40 steps, observed at steps [4, 8, 12, 16]. PET at `4fca540`, 2026-10-29.
 
 **The data and its forecast**
@@ -117,6 +119,8 @@ methods and their settings, and `scores.py` for what is scored.
 
 ## Case `fine`: 50 x 50 cells
 
+The base case, at twice the resolution.
+
 8 truths, 50 members; history of 16 of 40 steps, observed at steps [4, 8, 12, 16]. PET at `4fca540`, 2026-10-29.
 
 **The data and its forecast**
@@ -166,3 +170,219 @@ methods and their settings, and `scores.py` for what is scored.
 | ES-MDA (4 steps, α = 4), adaptive localization (universal threshold) | 0.0306 ± 0.005 | 0.0342 ± 0.002 | 0.0232 ± 0.003 |
 | ES-MDA (4 steps, α = 4), adaptive localization (3σ threshold) | 0.0335 ± 0.004 | 0.0317 ± 0.001 | 0.0239 ± 0.003 |
 | ES-MDA (4 steps, α = 4), distance localization (Gaspari-Cohn, 300 m) | 0.0338 ± 0.005 | 0.0249 ± 0.0004 | 0.0266 ± 0.004 |
+
+## Case `unfavourable`: 25 x 25 cells
+
+Oil 50 times as viscous as water: the water breaks through early and abruptly, so the history is strongly nonlinear in the permeability. Where iterating should pay.
+
+20 truths, 50 members; history of 16 of 40 steps, observed at steps [4, 8, 12, 16]. PET at `4fca540`, 2026-10-30.
+
+**The data and its forecast**
+
+| | misfit | RMSE forecast WWCT | CRPS forecast WWCT | failed members | simulations |
+|---|---|---|---|---|---|
+| prior | 188 ± 20 | 0.209 ± 0.02 | 0.119 ± 0.01 | 0 |  |
+| ES (one update) (reference) | 21.5 | 0.0817 | 0.041 | 0 | 100 |
+| LM-EnRML (4 iterations) | 2.39 ± 2 | 0.0588 ± 0.007 | 0.0289 ± 0.004 | 0 | 255 |
+| GN-EnRML (4 iterations) | 12.3 ± 1 | 0.0848 ± 0.009 | 0.0453 ± 0.005 | 0 | 250 |
+| GN-EnRML (4 iterations), subspace2 analysis | 14.2 ± 1 | 0.0919 ± 0.009 | 0.0494 ± 0.006 | 0 | 250 |
+| GN-EnRML (4 iterations), margis analysis | 15.4 ± 1 | 0.0928 ± 0.01 | 0.0504 ± 0.007 | 0 | 250 |
+| ES-MDA (4 steps, α = 4) | 1.97 ± 2 | 0.0566 ± 0.007 | 0.0276 ± 0.004 | 0 | 250 |
+| ES-MDA (4 steps, α = 4), enif analysis | 12 ± 2 | 0.0694 ± 0.008 | 0.0339 ± 0.004 | 0 | 250 |
+| ES-MDA (4 steps, α = 4), adaptive localization (universal threshold) | 40.1 ± 8 | 0.102 ± 0.01 | 0.0554 ± 0.005 | 0 | 250 |
+| ES-MDA (4 steps, α = 4), adaptive localization (3σ threshold) | 20.7 ± 2 | 0.0864 ± 0.007 | 0.0437 ± 0.004 | 0 | 250 |
+| ES-MDA (4 steps, α = 4), distance localization (Gaspari-Cohn, 300 m) | 200 ± 100 | 0.071 ± 0.01 | 0.0384 ± 0.007 | 0 | 250 |
+
+**The log-permeability**
+
+| | RMSE | corr | spread | CRPS |
+|---|---|---|---|---|
+| prior | 0.78 ± 0.02 | 0.0299 ± 0.06 | 0.802 ± 0.003 | 0.449 ± 0.01 |
+| ES (one update) (reference) | 0.809 | 0.239 | 0.577 | 0.468 |
+| LM-EnRML (4 iterations) | 0.759 ± 0.02 | 0.266 ± 0.04 | 0.529 ± 0.003 | 0.437 ± 0.01 |
+| GN-EnRML (4 iterations) | 0.76 ± 0.01 | 0.264 ± 0.02 | 0.552 ± 0.003 | 0.438 ± 0.01 |
+| GN-EnRML (4 iterations), subspace2 analysis | 0.745 ± 0.01 | 0.274 ± 0.02 | 0.576 ± 0.002 | 0.425 ± 0.01 |
+| GN-EnRML (4 iterations), margis analysis | 0.726 ± 0.02 | 0.296 ± 0.03 | 0.611 ± 0.003 | 0.412 ± 0.01 |
+| ES-MDA (4 steps, α = 4) | 0.776 ± 0.01 | 0.281 ± 0.02 | 0.469 ± 0.004 | 0.455 ± 0.008 |
+| ES-MDA (4 steps, α = 4), enif analysis | 0.719 ± 0.02 | 0.315 ± 0.05 | 0.71 ± 0.002 | 0.407 ± 0.02 |
+| ES-MDA (4 steps, α = 4), adaptive localization (universal threshold) | 0.751 ± 0.02 | 0.229 ± 0.04 | 0.743 ± 0.002 | 0.43 ± 0.01 |
+| ES-MDA (4 steps, α = 4), adaptive localization (3σ threshold) | 0.746 ± 0.02 | 0.263 ± 0.03 | 0.713 ± 0.002 | 0.426 ± 0.01 |
+| ES-MDA (4 steps, α = 4), distance localization (Gaspari-Cohn, 300 m) | 0.735 ± 0.02 | 0.306 ± 0.04 | 0.683 ± 0.003 | 0.415 ± 0.01 |
+
+**The scalar `sor`**
+
+| | error | spread | CRPS |
+|---|---|---|---|
+| prior | 0.0314 ± 0.006 | 0.0383 ± 0.0007 | 0.0231 ± 0.005 |
+| ES (one update) (reference) | 0.0314 | 0.0253 | 0.0255 |
+| LM-EnRML (4 iterations) | 0.0375 ± 0.003 | 0.0219 ± 0.0007 | 0.0284 ± 0.003 |
+| GN-EnRML (4 iterations) | 0.0344 ± 0.003 | 0.0234 ± 0.0005 | 0.0264 ± 0.002 |
+| GN-EnRML (4 iterations), subspace2 analysis | 0.0336 ± 0.003 | 0.0247 ± 0.0006 | 0.0262 ± 0.002 |
+| GN-EnRML (4 iterations), margis analysis | 0.0324 ± 0.003 | 0.0266 ± 0.0005 | 0.0249 ± 0.003 |
+| ES-MDA (4 steps, α = 4) | 0.0391 ± 0.003 | 0.0192 ± 0.0006 | 0.0305 ± 0.002 |
+| ES-MDA (4 steps, α = 4), enif analysis | 0.0275 ± 0.003 | 0.0335 ± 0.0007 | 0.0207 ± 0.003 |
+| ES-MDA (4 steps, α = 4), adaptive localization (universal threshold) | 0.027 ± 0.005 | 0.0329 ± 0.0009 | 0.0198 ± 0.004 |
+| ES-MDA (4 steps, α = 4), adaptive localization (3σ threshold) | 0.0288 ± 0.004 | 0.0307 ± 0.0006 | 0.0202 ± 0.004 |
+| ES-MDA (4 steps, α = 4), distance localization (Gaspari-Cohn, 300 m) | 0.0338 ± 0.002 | 0.0232 ± 0.0003 | 0.026 ± 0.002 |
+
+## Case `pattern`: 25 x 25 cells
+
+Nine producers and four injectors, on a field of half the correlation range (150 m): many data, each informative about its own neighbourhood only. Where localization should pay.
+
+20 truths, 50 members; history of 16 of 40 steps, observed at steps [4, 8, 12, 16]. PET at `4fca540`, 2026-10-30.
+
+**The data and its forecast**
+
+| | misfit | RMSE forecast WWCT | CRPS forecast WWCT | failed members | simulations |
+|---|---|---|---|---|---|
+| prior | 55.7 ± 6 | 0.204 ± 0.009 | 0.11 ± 0.006 | 0 |  |
+| ES (one update) (reference) | 18.5 | 0.111 | 0.0561 | 0 | 100 |
+| LM-EnRML (4 iterations) | 1.74 ± 6 | 0.0921 ± 0.008 | 0.0418 ± 0.004 | 0 | 250 |
+| GN-EnRML (4 iterations) | 4.52 ± 6 | 0.102 ± 0.008 | 0.0473 ± 0.004 | 0 | 250 |
+| GN-EnRML (4 iterations), subspace2 analysis | 5.14 ± 6 | 0.108 ± 0.008 | 0.0496 ± 0.004 | 0 | 250 |
+| GN-EnRML (4 iterations), margis analysis | 5.24 ± 6 | 0.104 ± 0.009 | 0.0482 ± 0.004 | 0 | 250 |
+| ES-MDA (4 steps, α = 4) | 1.39 ± 6 | 0.082 ± 0.007 | 0.0404 ± 0.003 | 0 | 250 |
+| ES-MDA (4 steps, α = 4), enif analysis | 7.59 ± 6 | 0.103 ± 0.009 | 0.0475 ± 0.004 | 0 | 250 |
+| ES-MDA (4 steps, α = 4), adaptive localization (universal threshold) | 30.9 ± 7 | 0.161 ± 0.01 | 0.0838 ± 0.006 | 0 | 250 |
+| ES-MDA (4 steps, α = 4), adaptive localization (3σ threshold) | 18.5 ± 6 | 0.137 ± 0.01 | 0.0688 ± 0.005 | 0 | 250 |
+| ES-MDA (4 steps, α = 4), distance localization (Gaspari-Cohn, 300 m) | 2.67 ± 6 | 0.0745 ± 0.007 | 0.033 ± 0.003 | 0 | 250 |
+
+**The log-permeability**
+
+| | RMSE | corr | spread | CRPS |
+|---|---|---|---|---|
+| prior | 0.792 ± 0.03 | 0.0191 ± 0.02 | 0.797 ± 0.002 | 0.452 ± 0.02 |
+| ES (one update) (reference) | 1.01 ⚠ | 0.139 | 0.487 | 0.624 ⚠ |
+| LM-EnRML (4 iterations) | 0.868 ± 0.03 ⚠ | 0.166 ± 0.03 | 0.431 ± 0.004 | 0.534 ± 0.02 ⚠ |
+| GN-EnRML (4 iterations) | 0.872 ± 0.02 ⚠ | 0.15 ± 0.02 | 0.447 ± 0.002 | 0.533 ± 0.01 ⚠ |
+| GN-EnRML (4 iterations), subspace2 analysis | 0.851 ± 0.02 ⚠ | 0.162 ± 0.02 | 0.498 ± 0.002 | 0.51 ± 0.02 ⚠ |
+| GN-EnRML (4 iterations), margis analysis | 0.819 ± 0.02 ⚠ | 0.185 ± 0.02 | 0.533 ± 0.002 | 0.482 ± 0.02 ⚠ |
+| ES-MDA (4 steps, α = 4) | 0.954 ± 0.02 ⚠ | 0.156 ± 0.02 | 0.32 ± 0.005 | 0.624 ± 0.01 ⚠ |
+| ES-MDA (4 steps, α = 4), enif analysis | 0.752 ± 0.03 | 0.272 ± 0.02 | 0.701 ± 0.001 | 0.428 ± 0.02 |
+| ES-MDA (4 steps, α = 4), adaptive localization (universal threshold) | 0.787 ± 0.03 | 0.1 ± 0.02 | 0.777 ± 0.002 | 0.45 ± 0.02 |
+| ES-MDA (4 steps, α = 4), adaptive localization (3σ threshold) | 0.79 ± 0.03 | 0.139 ± 0.02 | 0.75 ± 0.002 | 0.451 ± 0.02 |
+| ES-MDA (4 steps, α = 4), distance localization (Gaspari-Cohn, 300 m) | 0.767 ± 0.03 | 0.254 ± 0.02 | 0.652 ± 0.002 | 0.439 ± 0.02 |
+
+**The scalar `sor`**
+
+| | error | spread | CRPS |
+|---|---|---|---|
+| prior | 0.0314 ± 0.008 | 0.0383 ± 0.0009 | 0.0231 ± 0.006 |
+| ES (one update) (reference) | 0.0279 | 0.0155 | 0.022 |
+| LM-EnRML (4 iterations) | 0.0152 ± 0.005 | 0.0119 ± 0.0006 | 0.0116 ± 0.004 |
+| GN-EnRML (4 iterations) | 0.017 ± 0.003 | 0.0138 ± 0.0005 | 0.0123 ± 0.003 |
+| GN-EnRML (4 iterations), subspace2 analysis | 0.0171 ± 0.004 | 0.0153 ± 0.0006 | 0.0122 ± 0.003 |
+| GN-EnRML (4 iterations), margis analysis | 0.016 ± 0.004 | 0.0165 ± 0.0005 | 0.0114 ± 0.003 |
+| ES-MDA (4 steps, α = 4) | 0.0184 ± 0.004 | 0.00906 ± 0.0005 | 0.0152 ± 0.003 |
+| ES-MDA (4 steps, α = 4), enif analysis | 0.0225 ± 0.007 | 0.0251 ± 0.0007 | 0.0165 ± 0.005 |
+| ES-MDA (4 steps, α = 4), adaptive localization (universal threshold) | 0.0199 ± 0.006 | 0.0301 ± 0.001 | 0.0149 ± 0.005 |
+| ES-MDA (4 steps, α = 4), adaptive localization (3σ threshold) | 0.0182 ± 0.005 | 0.0263 ± 0.0007 | 0.0134 ± 0.004 |
+| ES-MDA (4 steps, α = 4), distance localization (Gaspari-Cohn, 300 m) | 0.0196 ± 0.003 | 0.011 ± 0.0004 | 0.0152 ± 0.003 |
+
+## Case `dense`: 25 x 25 cells
+
+Every step of the history assimilated: 144 data for 50 members. Where the analyses for more data than members (subspace2, margIS) should pay.
+
+20 truths, 50 members; history of 16 of 40 steps, observed at steps [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16]. PET at `4fca540`, 2026-10-30.
+
+**The data and its forecast**
+
+| | misfit | RMSE forecast WWCT | CRPS forecast WWCT | failed members | simulations |
+|---|---|---|---|---|---|
+| prior | 102 ± 6 | 0.242 ± 0.01 | 0.141 ± 0.009 | 0 |  |
+| ES (one update) (reference) | 12.3 | 0.126 | 0.066 | 0 | 100 |
+| LM-EnRML (4 iterations) | 1.35 ± 0.9 | 0.0939 ± 0.008 | 0.0463 ± 0.005 | 0 | 270 |
+| GN-EnRML (4 iterations) | 4.63 ± 0.8 | 0.109 ± 0.01 | 0.058 ± 0.006 | 0 | 250 |
+| GN-EnRML (4 iterations), subspace2 analysis | 5.31 ± 0.8 | 0.111 ± 0.01 | 0.059 ± 0.006 | 0 | 250 |
+| GN-EnRML (4 iterations), margis analysis | 5.5 ± 0.8 | 0.115 ± 0.01 | 0.0602 ± 0.006 | 0 | 250 |
+| ES-MDA (4 steps, α = 4) | 1.19 ± 0.9 | 0.0919 ± 0.006 | 0.0453 ± 0.004 | 0 | 250 |
+| ES-MDA (4 steps, α = 4), enif analysis | 5.41 ± 0.8 | 0.0992 ± 0.009 | 0.0477 ± 0.005 | 0 | 250 |
+| ES-MDA (4 steps, α = 4), adaptive localization (universal threshold) | 20.1 ± 3 | 0.173 ± 0.02 | 0.0999 ± 0.01 | 0 | 250 |
+| ES-MDA (4 steps, α = 4), adaptive localization (3σ threshold) | 9.71 ± 1 | 0.138 ± 0.01 | 0.0753 ± 0.01 | 0 | 250 |
+| ES-MDA (4 steps, α = 4), distance localization (Gaspari-Cohn, 300 m) | 12.8 ± 2 | 0.108 ± 0.01 | 0.0555 ± 0.008 | 0 | 250 |
+
+**The log-permeability**
+
+| | RMSE | corr | spread | CRPS |
+|---|---|---|---|---|
+| prior | 0.78 ± 0.02 | 0.0299 ± 0.05 | 0.802 ± 0.004 | 0.449 ± 0.02 |
+| ES (one update) (reference) | 0.792 | 0.326 | 0.465 | 0.468 |
+| LM-EnRML (4 iterations) | 0.723 ± 0.02 | 0.366 ± 0.03 | 0.434 ± 0.009 | 0.421 ± 0.01 |
+| GN-EnRML (4 iterations) | 0.724 ± 0.01 | 0.356 ± 0.02 | 0.421 ± 0.004 | 0.423 ± 0.009 |
+| GN-EnRML (4 iterations), subspace2 analysis | 0.711 ± 0.01 | 0.368 ± 0.02 | 0.459 ± 0.004 | 0.411 ± 0.01 |
+| GN-EnRML (4 iterations), margis analysis | 0.703 ± 0.02 | 0.374 ± 0.03 | 0.539 ± 0.004 | 0.399 ± 0.01 |
+| ES-MDA (4 steps, α = 4) | 0.773 ± 0.01 | 0.327 ± 0.02 | 0.358 ± 0.008 | 0.469 ± 0.009 |
+| ES-MDA (4 steps, α = 4), enif analysis | 0.7 ± 0.02 | 0.37 ± 0.04 | 0.663 ± 0.003 | 0.394 ± 0.02 |
+| ES-MDA (4 steps, α = 4), adaptive localization (universal threshold) | 0.763 ± 0.02 | 0.188 ± 0.04 | 0.737 ± 0.003 | 0.436 ± 0.01 |
+| ES-MDA (4 steps, α = 4), adaptive localization (3σ threshold) | 0.743 ± 0.02 | 0.272 ± 0.03 | 0.698 ± 0.003 | 0.422 ± 0.01 |
+| ES-MDA (4 steps, α = 4), distance localization (Gaspari-Cohn, 300 m) | 0.71 ± 0.02 | 0.368 ± 0.03 | 0.639 ± 0.003 | 0.401 ± 0.01 |
+
+**The scalar `sor`**
+
+| | error | spread | CRPS |
+|---|---|---|---|
+| prior | 0.0314 ± 0.004 | 0.0383 ± 0.0007 | 0.0231 ± 0.004 |
+| ES (one update) (reference) | 0.0343 | 0.0208 | 0.0261 |
+| LM-EnRML (4 iterations) | 0.0319 ± 0.003 | 0.0195 ± 0.0006 | 0.0247 ± 0.003 |
+| GN-EnRML (4 iterations) | 0.0318 ± 0.002 | 0.0186 ± 0.0005 | 0.025 ± 0.002 |
+| GN-EnRML (4 iterations), subspace2 analysis | 0.0306 ± 0.003 | 0.0206 ± 0.0006 | 0.024 ± 0.002 |
+| GN-EnRML (4 iterations), margis analysis | 0.0274 ± 0.003 | 0.0242 ± 0.0004 | 0.0214 ± 0.003 |
+| ES-MDA (4 steps, α = 4) | 0.0314 ± 0.003 | 0.0159 ± 0.0006 | 0.0252 ± 0.003 |
+| ES-MDA (4 steps, α = 4), enif analysis | 0.0238 ± 0.005 | 0.0305 ± 0.0006 | 0.0178 ± 0.004 |
+| ES-MDA (4 steps, α = 4), adaptive localization (universal threshold) | 0.0261 ± 0.005 | 0.0326 ± 0.0006 | 0.0192 ± 0.004 |
+| ES-MDA (4 steps, α = 4), adaptive localization (3σ threshold) | 0.0249 ± 0.004 | 0.0297 ± 0.0006 | 0.0192 ± 0.003 |
+| ES-MDA (4 steps, α = 4), distance localization (Gaspari-Cohn, 300 m) | 0.0317 ± 0.004 | 0.0179 ± 0.0004 | 0.0251 ± 0.003 |
+
+## Case `early`: 25 x 25 cells
+
+Only the first 6 steps observed, before any water breaks through: rates and pressures, nearly linear in the permeability. Where a single update should do.
+
+20 truths, 50 members; history of 6 of 40 steps, observed at steps [2, 4, 6]. PET at `4fca540`, 2026-10-30.
+
+**The data and its forecast**
+
+| | misfit | RMSE forecast WWCT | CRPS forecast WWCT | failed members | simulations |
+|---|---|---|---|---|---|
+| prior | 45.6 ± 4 | 0.235 ± 0.02 | 0.131 ± 0.01 | 0 |  |
+| ES (one update) (reference) | 6.39 | 0.148 | 0.0745 | 0 | 100 |
+| LM-EnRML (4 iterations) | 1.08 ± 0.9 | 0.15 ± 0.007 | 0.0757 ± 0.004 | 0 | 252 |
+| GN-EnRML (4 iterations) | 2.1 ± 0.7 | 0.15 ± 0.006 | 0.0758 ± 0.003 | 0 | 250 |
+| GN-EnRML (4 iterations), subspace2 analysis | 2.24 ± 0.7 | 0.146 ± 0.006 | 0.0736 ± 0.003 | 0 | 250 |
+| GN-EnRML (4 iterations), margis analysis | 2.48 ± 0.7 | 0.147 ± 0.006 | 0.0742 ± 0.003 | 0 | 250 |
+| ES-MDA (4 steps, α = 4) | 0.952 ± 0.9 | 0.143 ± 0.003 | 0.0715 ± 0.002 | 0 | 250 |
+| ES-MDA (4 steps, α = 4), enif analysis | 2.93 ± 0.7 | 0.161 ± 0.01 | 0.0829 ± 0.007 | 0 | 250 |
+| ES-MDA (4 steps, α = 4), adaptive localization (universal threshold) | 4.93 ± 1 | 0.183 ± 0.01 | 0.0993 ± 0.01 | 0 | 250 |
+| ES-MDA (4 steps, α = 4), adaptive localization (3σ threshold) | 3.05 ± 0.8 | 0.17 ± 0.01 | 0.0897 ± 0.006 | 0 | 250 |
+| ES-MDA (4 steps, α = 4), distance localization (Gaspari-Cohn, 300 m) | 4.53 ± 1 | 0.152 ± 0.008 | 0.0765 ± 0.004 | 0 | 250 |
+
+**The log-permeability**
+
+| | RMSE | corr | spread | CRPS |
+|---|---|---|---|---|
+| prior | 0.78 ± 0.01 | 0.0299 ± 0.05 | 0.802 ± 0.003 | 0.449 ± 0.009 |
+| ES (one update) (reference) | 0.735 | 0.314 | 0.663 | 0.418 |
+| LM-EnRML (4 iterations) | 0.716 ± 0.008 | 0.322 ± 0.02 | 0.656 ± 0.003 | 0.407 ± 0.005 |
+| GN-EnRML (4 iterations) | 0.718 ± 0.008 | 0.317 ± 0.01 | 0.666 ± 0.002 | 0.407 ± 0.005 |
+| GN-EnRML (4 iterations), subspace2 analysis | 0.718 ± 0.01 | 0.321 ± 0.02 | 0.67 ± 0.002 | 0.408 ± 0.007 |
+| GN-EnRML (4 iterations), margis analysis | 0.721 ± 0.01 | 0.312 ± 0.02 | 0.676 ± 0.002 | 0.41 ± 0.008 |
+| ES-MDA (4 steps, α = 4) | 0.728 ± 0.005 | 0.321 ± 0.01 | 0.62 ± 0.003 | 0.415 ± 0.003 |
+| ES-MDA (4 steps, α = 4), enif analysis | 0.715 ± 0.02 | 0.318 ± 0.03 | 0.735 ± 0.002 | 0.407 ± 0.01 |
+| ES-MDA (4 steps, α = 4), adaptive localization (universal threshold) | 0.756 ± 0.01 | 0.189 ± 0.03 | 0.762 ± 0.002 | 0.432 ± 0.007 |
+| ES-MDA (4 steps, α = 4), adaptive localization (3σ threshold) | 0.745 ± 0.01 | 0.239 ± 0.03 | 0.74 ± 0.002 | 0.425 ± 0.007 |
+| ES-MDA (4 steps, α = 4), distance localization (Gaspari-Cohn, 300 m) | 0.716 ± 0.01 | 0.316 ± 0.02 | 0.715 ± 0.002 | 0.406 ± 0.008 |
+
+**The scalar `sor`**
+
+| | error | spread | CRPS |
+|---|---|---|---|
+| prior | 0.0314 ± 0.003 | 0.0383 ± 0.0004 | 0.0231 ± 0.002 |
+| ES (one update) (reference) | 0.0292 | 0.0346 | 0.0214 |
+| LM-EnRML (4 iterations) | 0.029 ± 0.001 | 0.035 ± 0.0004 | 0.0217 ± 0.0009 |
+| GN-EnRML (4 iterations) | 0.0293 ± 0.001 | 0.0354 ± 0.0003 | 0.0216 ± 0.0009 |
+| GN-EnRML (4 iterations), subspace2 analysis | 0.0299 ± 0.002 | 0.0357 ± 0.0003 | 0.0221 ± 0.001 |
+| GN-EnRML (4 iterations), margis analysis | 0.0304 ± 0.002 | 0.0358 ± 0.0003 | 0.0224 ± 0.001 |
+| ES-MDA (4 steps, α = 4) | 0.0287 ± 0.002 | 0.033 ± 0.0004 | 0.0223 ± 0.001 |
+| ES-MDA (4 steps, α = 4), enif analysis | 0.0301 ± 0.002 | 0.0378 ± 0.0004 | 0.0221 ± 0.002 |
+| ES-MDA (4 steps, α = 4), adaptive localization (universal threshold) | 0.0314 ± 0.003 | 0.0383 ± 0.0004 | 0.0231 ± 0.002 |
+| ES-MDA (4 steps, α = 4), adaptive localization (3σ threshold) | 0.0312 ± 0.003 | 0.0381 ± 0.0004 | 0.0231 ± 0.002 |
+| ES-MDA (4 steps, α = 4), distance localization (Gaspari-Cohn, 300 m) | 0.0293 ± 0.002 | 0.0339 ± 0.0003 | 0.0223 ± 0.0009 |

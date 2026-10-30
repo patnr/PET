@@ -26,6 +26,7 @@ same truths, the same scores.
 | `methods.py` | The methods compared, each a label and its PET settings (`[dataassim]`). |
 | `scores.py` | What an ensemble is scored on. |
 | `run.py` | Runs the methods on the cases, and generates `RESULTS.md`. |
+| `tune.py` | Tunes the methods' settings, on twin experiments of its own, into `results/tuning.json`; `methods.py` adds a tuned row for each method whose default it beat. |
 | `results/` | The scores of each case and ensemble size (`<case>-ne<ne>.json`), per method and truth, with the PET commit each method was run at; `RESULTS.md` is generated from them. |
 | `RESULTS.md` | The tables. Generated; do not edit by hand. |
 
@@ -53,6 +54,20 @@ every change, so `RESULTS.md` may lag behind the methods and scores defined here
 of the methods replaces only their rows; a row run at another PET commit than the rest of its
 table is marked with that commit. The full tables are at 50 members (`NE` of `cases.py`); a case
 with other sizes (`sizes`) also gets a few scores tabled against the ensemble size.
+
+## Tuning
+
+The methods run at their defaults, which makes a comparison of rows partly a comparison of
+settings. `tune.py` tunes them by a protocol fixed in advance (see its docstring): on truths of
+its own, not the scored ones; for the forecast's CRPS; on `coarse`, at 50 members; for no more
+simulations than the default; and the default stands unless beaten by more than twice the
+standard error of the difference. A tuned row is then shown next to its default, and how far
+it carries over to the other cases and ensemble sizes is for the tables to tell.
+
+```sh
+python tune.py                      # every method with a grid (GRIDS), about 1200 experiments
+python tune.py --truths 2           # a check: printed, not written
+```
 
 ## Adding a method or a score
 

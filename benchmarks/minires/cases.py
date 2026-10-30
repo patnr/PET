@@ -47,6 +47,7 @@ class Case:
     n: int  # cells per side
     truths: int  # the number of twin experiments run by default
     sizes: tuple = (NE,)  # the ensemble sizes run by default
+    about: str = ""  # what sets the case apart, and what it is to show
     producers: tuple = CORNERS  # positions, as fractions of the extent
     injectors: tuple = CENTRE
     injection: float = 1000.0  # the total injection rate [m3/day], shared by the injectors
@@ -146,20 +147,20 @@ class Case:
 CASES = {
     c.name: c
     for c in [
-        Case("coarse", 25, truths=20, sizes=(20, 50, 100)),
-        Case("fine", 50, truths=8),
-        # Oil 50 times as viscous as water: the water breaks through early and abruptly, so the
-        # history is strongly nonlinear in the permeability. Where iterating should pay.
-        Case("unfavourable", 25, truths=20, vo=50.0),
-        # Nine producers and four injectors, on a field of half the correlation range: many data,
-        # each informative about its own neighbourhood only. Where localization should pay.
-        Case("pattern", 25, truths=20, producers=NINE, injectors=FOUR, range=150.0),
-        # Every step of the history assimilated: 144 data for 50 members, closely spaced in time.
-        # Where the analyses for more data than members (subspace, margIS) should pay.
-        Case("dense", 25, truths=20, obs_every=1),
-        # Only the first 6 steps observed, before any water breaks through: rates and pressures,
-        # nearly linear in the permeability. Where a single update should do.
-        Case("early", 25, truths=20, history=6, obs_every=2),
+        Case("coarse", 25, truths=20, sizes=(20, 50, 100), about="The base case."),
+        Case("fine", 50, truths=8, about="The base case, at twice the resolution."),
+        Case("unfavourable", 25, truths=20, vo=50.0, about=(
+            "Oil 50 times as viscous as water: the water breaks through early and abruptly, so the "
+            "history is strongly nonlinear in the permeability. Where iterating should pay.")),
+        Case("pattern", 25, truths=20, producers=NINE, injectors=FOUR, range=150.0, about=(
+            "Nine producers and four injectors, on a field of half the correlation range (150 m): "
+            "many data, each informative about its own neighbourhood only. Where localization should pay.")),
+        Case("dense", 25, truths=20, obs_every=1, about=(
+            "Every step of the history assimilated: 144 data for 50 members. Where the analyses for "
+            "more data than members (subspace2, margIS) should pay.")),
+        Case("early", 25, truths=20, history=6, obs_every=2, about=(
+            "Only the first 6 steps observed, before any water breaks through: rates and pressures, "
+            "nearly linear in the permeability. Where a single update should do.")),
     ]
 }
 

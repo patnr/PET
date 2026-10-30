@@ -179,6 +179,7 @@ def render_case(title: str, res: dict, case: Case) -> list:
         "",
         title,
         "",
+        *([case.about, ""] if case.about else []),
         f"{meta['truths']} truths, {meta['ne']} members; history of {case.history} of {NSTEPS} steps, "
         f"observed at steps {case.obs_steps}. PET at `{usual}`, {date_}"
         + (", except the rows marked with another commit." if other else "."),

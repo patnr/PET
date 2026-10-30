@@ -3,8 +3,12 @@
 The settings are PET's own, as a config would give them, except that a distance localization
 gives its ``radius`` in metres: ``run.py`` places a taper of that radius at each datum's well,
 on the case's grid. Unless a row says it is tuned, the settings are defaults or the textbook
-choice, the same for every case.
+choice, the same for every case. A tuned row is added below its default's for each method whose
+default ``tune.py`` beat, at the setting it chose (``results/tuning.json``).
 """
+
+import json
+from pathlib import Path
 
 COMMON = {"energy": 99.0, "obsname": "steps"}
 
@@ -71,6 +75,23 @@ METHODS = [
         },
     },
 ]
+
+
+def tuned(methods: list) -> list:
+    """``methods``, each followed by its tuned row, if the tuning beat its default."""
+    file = Path(__file__).parent / "results" / "tuning.json"
+    tuning = json.loads(file.read_text()) if file.exists() else {}
+    out = []
+    for m in methods:
+        out.append(m)
+        t = tuning.get(m["label"])
+        if t and t["chosen"] != t["default"]:
+            point = t["points"][t["chosen"]]
+            out.append({"label": f"{m['label']}, tuned: {point['description']}", "dataassim": point["dataassim"]})
+    return out
+
+
+METHODS = tuned(METHODS)
 
 # The row the others are compared with, truth by truth: a single update, which iterating improves on
 REFERENCE = "ES (one update)"
