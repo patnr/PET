@@ -55,6 +55,7 @@ class Case:
     obs_every: int = 4
     vo: float = 5.0  # the oil viscosity [cP]; the water's is 1
     range: float = 300.0  # the prior's correlation range [m]
+    sd: float = LOGK_SD  # the prior's standard deviation of log K
     # The unknown scalars of the fluid: {name: (mean, sd, limits)}
     scalars: dict = field(default_factory=lambda: {"sor": (0.22, 0.04, [0.05, 0.40])})
 
@@ -114,7 +115,7 @@ class Case:
             "ne": ne, "seed": seed, "disable_tqdm": True, "save_prior": False,
             "state": ["permx", *self.scalars],
             "prior_permx": {
-                "vario": "exp", "mean": mean_file, "var": LOGK_SD**2,
+                "vario": "exp", "mean": mean_file, "var": self.sd**2,
                 "range": self.range / self.dx, "aniso": 1.0, "angle": 0.0, "grid": [self.n, self.n, 1],
             },
         }
