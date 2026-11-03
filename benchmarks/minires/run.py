@@ -296,6 +296,8 @@ def render(results: dict) -> str:
         "- A case other than `base` shows only the table that carries its story; the others are summed",
         "  up in a line, and `python run.py --show` prints every table of every case.",
     ]
+    if "summary" in FINDINGS:
+        lines += ["", "## Summary of findings", "", FINDINGS["summary"]]
     for case_name, by_ne in results.items():
         case = CASES[case_name]
         if NE in by_ne:

@@ -1,7 +1,7 @@
 """What the tables of RESULTS.md show, in a few sentences per heading: written by hand, rendered by run.py.
 
-``FINDINGS`` is keyed by case (its tables at NE members), or by ``<case>/sizes`` (its table by
-ensemble size). Each says what the case was to show, whether it does, and what follows for PET.
+``FINDINGS`` is keyed by case (its tables at NE members), by ``<case>/sizes`` (its table by
+ensemble size), or ``summary`` (across the cases, at the top). Each says what the case was to show, whether it does, and what follows for PET.
 ``TABLES`` says which of a case's tables RESULTS.md shows (keyed as in ``run.tables``, and
 ``sizes``): the others repeat the picture of ``base``, and are stood in for by a line. Both are
 written from the official runs of 2026-11-03: when those are redone, check that they still hold.
@@ -16,6 +16,27 @@ TABLES = {
 }
 
 FINDINGS = {
+    "summary": (
+        "Three things hold on every case. Iterating pays, and more than members do: LM-EnRML at 50 members beats "
+        "ES at 125 for the same 250 simulations, by most where the history is most nonlinear (`viscous`). "
+        "Localization pays on top of it: distance localization at the prior's range is the best row for the "
+        "forecast (CRPS 0.023 to 0.039), learns as much of the field as the best unlocalized row, and is better "
+        "calibrated (spread/RMSE 0.7 to 0.8) than any unlocalized row (0.25 to 0.65); its margin is widest where "
+        "the field has the most degrees of freedom (`rough`, where ES and ES-MDA end up worse than the prior on "
+        "it). Among the unlocalized iterating schemes, LM-EnRML is first on every case but `coarse`; ES-MDA trails "
+        "it by 0.006 to 0.013 and is the most overconfident of the rows (spread/RMSE 0.25 to 0.30), the more so "
+        "with a scalar to learn (`scalars`); GN-EnRML's γ max = 0.5 costs it 0.003 to 0.012 against γ max = 1 "
+        "(tuned), at which it comes close to LM-EnRML; the margIS analysis is the best calibrated unlocalized row "
+        "and learns the field most. EnIF stays calibrated throughout, but learns the field least of the iterating "
+        "rows and forecasts no better than ES at 125 members.\n\n"
+        "For PET's defaults: GN-EnRML's γ max = 0.5, the adaptive localization's universal and 3σ thresholds "
+        "(worse than ES at 125 members on every case) and EnIF's neighbourhood of 2 (worse than 1 on every case) "
+        "are poor; LM-EnRML's, ES-MDA's and the distance localization's stand. The adaptive localization at 1.5σ "
+        "(tuned) matches LM-EnRML on the forecast, but not on the field, and not the distance localization "
+        "except at 100 members; at the universal threshold it, like EnIF, localizes a global scalar away "
+        "(`scalars`). The tuning's one rejection shows why it confirms on fresh truths: ES-MDA's steeper "
+        "schedule gained 0.021 on the selection truths and 0.005 ± 0.003 on fresh ones."
+    ),
     "base": (
         "The data are worth having: the field's RMSE falls by 43 % (0.80 to 0.45, margIS tuned; 0.47 for LM-EnRML "
         "and distance localization) and the forecast's CRPS by 75 % (0.142 to 0.035, distance localization), and "
