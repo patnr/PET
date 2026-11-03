@@ -7,7 +7,9 @@ twin experiment can compute because it knows the truth.
 
 import numpy as np
 
-from cases import Twin
+from cases import DT, NSTEPS, Twin
+
+BREAKTHROUGH = 0.05  # the water cut at which a producer is said to have broken through
 
 
 def crps(ensemble: np.ndarray, truth) -> np.ndarray:
@@ -20,6 +22,12 @@ def crps(ensemble: np.ndarray, truth) -> np.ndarray:
     x = np.sort(ensemble, axis=1)
     spread = 2 / ne**2 * (x @ (2 * np.arange(1, ne + 1) - ne - 1))
     return np.mean(np.abs(ensemble - np.atleast_1d(truth)[:, None]), axis=1) - spread / 2
+
+
+def breakthrough(wwct: np.ndarray) -> np.ndarray:
+    """The day each producer first has a water cut above ``BREAKTHROUGH``: ``(ne, nprod)`` from ``(ne, NSTEPS, nprod)``."""
+    hit = wwct > BREAKTHROUGH
+    return DT * np.where(hit.any(axis=1), hit.argmax(axis=1) + 1, NSTEPS + 1)
 
 
 def scores(states: dict, responses: np.ndarray, twin: Twin) -> dict:
@@ -52,12 +60,17 @@ def scores(states: dict, responses: np.ndarray, twin: Twin) -> dict:
     out["forecast_wwct_rmse"] = float(np.sqrt(np.mean((members.mean(axis=0) - truth) ** 2)))
     out["forecast_wwct_crps"] = float(np.mean(crps(members.reshape(len(members), -1).T, truth.ravel())))
 
+    # The breakthrough: when each producer's water cut first exceeds BREAKTHROUGH, in days, over
+    # the whole simulation (a producer that never does gets the day after the last step)
+    out["breakthrough_crps"] = float(np.mean(crps(breakthrough(responses[..., wwct]).T, breakthrough(twin.response[None, :, wwct])[0])))
+
     # The field: error and correlation of the ensemble mean, and the spread left
     logk, true_logk = states["permx"], twin.truth["permx"]
     mean = logk.mean(axis=1)
     out["logk_rmse"] = float(np.sqrt(np.mean((mean - true_logk) ** 2)))
     out["logk_corr"] = float(np.corrcoef(mean, true_logk)[0, 1])
     out["logk_spread"] = float(logk.std(axis=1, ddof=1).mean())
+    out["logk_ratio"] = out["logk_spread"] / out["logk_rmse"]  # spread/RMSE: about 1 if calibrated
     out["logk_crps"] = float(crps(logk, true_logk).mean())
 
     # The scalars: error of the ensemble mean, and the spread left

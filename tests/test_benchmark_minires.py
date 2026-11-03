@@ -13,8 +13,12 @@ from methods import METHODS  # noqa: E402
 from run import experiment  # noqa: E402
 
 
+# A row with members of its own is a repeat of another at a different size: not worth a test
+TESTED = [m for m in METHODS if "members" not in m]
+
+
 @pytest.mark.slow
-@pytest.mark.parametrize("method", METHODS, ids=[m["label"] for m in METHODS])
+@pytest.mark.parametrize("method", TESTED, ids=[m["label"] for m in TESTED])
 def test_a_twin_experiment_runs_and_scores(method):
     out = experiment("coarse", method, 0, ne=6)
     assert out["runs"] > 0

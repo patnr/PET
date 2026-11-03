@@ -49,7 +49,7 @@ from simulator.minires import MiniRes
 
 HERE = Path(__file__).parent
 TRUTH_SEED, ENSEMBLE_SEED = 1000, 2000  # truth i is drawn with TRUTH_SEED + i
-QUICK = {"case": ["coarse"], "truths": 5, "ne": [NE]}
+QUICK = {"case": ["coarse"], "truths": 3, "ne": [NE]}
 
 
 class CountingMiniRes(MiniRes):
@@ -80,16 +80,18 @@ def experiment(case_name: str, method: dict, i: int, ne: int) -> dict:
         pd.DataFrame(variance, index=index, columns=case.datatypes).to_csv("var.csv")
 
         dataassim = {**COMMON, **method["dataassim"], "data": "data.csv", "datavar": "var.csv", "savefolder": "Results"}
-        if "localization" in dataassim:  # the grid and the wells are the case's, not the method's
+        if "localization" in dataassim:  # the grid, the wells and the scalars are the case's, not the method's
             loc = {"field": [case.n, case.n], **dataassim["localization"]}
             if loc["name"] == "distance_loc":
                 loc["field"] = [1, case.n, case.n]
-                loc["entries"] = [{"taper": loc["taper_func"], **e} for e in case.distance_entries(loc.pop("radius"))]
+                loc["unlocalized"] = list(case.scalars)
+                radius = loc.pop("radius") * case.range  # given as a multiple of the prior's range
+                loc["entries"] = [{"taper": loc["taper_func"], **e} for e in case.distance_entries(radius)]
             dataassim["localization"] = loc
         keys_da, keys_sim, keys_en = normalize(
             dataassim,
             case.simulator(case.obs_steps),
-            case.ensemble(ne, ENSEMBLE_SEED + i, "priormean.npz"),
+            case.ensemble(method.get("members", ne), ENSEMBLE_SEED + i, "priormean.npz"),
         )
         sim = CountingMiniRes(keys_sim)
         scheme = get_scheme(keys_da["scheme"], keys_da["analysis"])(keys_da, keys_en, sim)
@@ -110,16 +112,20 @@ def experiment(case_name: str, method: dict, i: int, ne: int) -> dict:
 # Tables
 # ----------------------------------------------------------------------
 def tables(case: Case) -> dict:
-    """The tables of a case, each ``{score: column}``."""
+    """The tables of a case, each ``{score: column}``. Besides the scores of ``scores.py``: ``wins``,
+    the truths on which the row's forecast CRPS beats the reference's; ``blowups``, the truths on
+    which the row fits the history worse than the prior; and ``runs``, the simulations spent."""
     return {
-        "The data and its forecast": {
-            "misfit": "misfit",
-            "forecast_wwct_rmse": "RMSE forecast WWCT",
+        "The forecast, and the fit of the history": {
             "forecast_wwct_crps": "CRPS forecast WWCT",
+            "wins": "wins vs ES",
+            "breakthrough_crps": "CRPS breakthrough [days]",
+            "misfit": "misfit (median)",
+            "blowups": "worse fit than the prior",
             "failed": "failed members",
             "runs": "simulations",
         },
-        "The log-permeability": {"logk_rmse": "RMSE", "logk_corr": "corr", "logk_spread": "spread", "logk_crps": "CRPS"},
+        "The log-permeability": {"logk_rmse": "RMSE", "logk_crps": "CRPS", "logk_ratio": "spread/RMSE", "logk_corr": "corr"},
         **{
             f"The scalar `{n}`": {f"{n}_error": "error", f"{n}_spread": "spread", f"{n}_crps": "CRPS"}
             for n in case.scalars
@@ -128,6 +134,7 @@ def tables(case: Case) -> dict:
 
 
 COUNTS = ["failed", "runs"]  # shown as plain means
+MEDIANS = ["misfit"]  # heavy-tailed: shown as the median, with no ±
 WORSE = "⚠"
 
 
@@ -195,10 +202,19 @@ def render_case(title: str, res: dict, case: Case, findings: str = "") -> list:
             for k in columns:
                 if k == "runs":
                     cells.append(f"{np.mean(sims):.0f}" if sims else "")
+                elif k == "wins":
+                    f = sc.get("forecast_wwct_crps")
+                    paired = label not in ("prior", REFERENCE) and f is not None and len(f) > 1
+                    cells.append(f"{int(np.sum(np.array(f) < np.array(ref['forecast_wwct_crps'])))}/{len(f)}" if paired else "")
+                elif k == "blowups":
+                    m = sc.get("misfit")
+                    cells.append(f"{int(np.sum(np.array(m) > np.array(prior['misfit'])))}" if label != "prior" and m is not None else "")
                 elif k not in sc:  # a score added since the official results were run
                     cells.append("")
                 elif k in COUNTS:
                     cells.append(f"{np.mean(sc[k]):.2g}")
+                elif k in MEDIANS:
+                    cells.append(f"{np.median(sc[k]):.3g}")
                 else:
                     against = None if label == REFERENCE else ref.get(k)
                     flag_vs = None if label == "prior" else prior.get(k)
@@ -208,7 +224,7 @@ def render_case(title: str, res: dict, case: Case, findings: str = "") -> list:
 
 
 # The scores shown against the ensemble size, each {score: heading}
-BY_SIZE = {"forecast_wwct_crps": "CRPS forecast WWCT", "logk_crps": "logK CRPS", "logk_spread": "logK spread"}
+BY_SIZE = {"forecast_wwct_crps": "CRPS forecast WWCT", "logk_rmse": "logK RMSE", "logk_ratio": "logK spread/RMSE"}
 
 
 def render_sizes(title: str, by_ne: dict, findings: str = "") -> list:
@@ -217,7 +233,8 @@ def render_sizes(title: str, by_ne: dict, findings: str = "") -> list:
     truths = {by_ne[ne]["meta"]["truths"] for ne in sizes}
     lines = ["", title, "", f"{', '.join(map(str, sorted(truths)))} truths. The ± are against ES at the same size."]
     lines += ["", f"**Findings.** {findings}"] if findings else []
-    labels = [m["label"] for m in METHODS if any(m["label"] in by_ne[ne]["methods"] for ne in sizes)]
+    # A row with members of its own is at that size in every table: it has no place here
+    labels = [m["label"] for m in METHODS if "members" not in m and any(m["label"] in by_ne[ne]["methods"] for ne in sizes)]
     for k, heading in BY_SIZE.items():
         lines += ["", f"**{heading}**", ""]
         lines += ["| | " + " | ".join(f"{ne} members" for ne in sizes) + " |", "|---" * (len(sizes) + 1) + "|"]
@@ -249,9 +266,14 @@ def render(results: dict) -> str:
         "- Each cell is the mean over the twin experiments (truths).",
         "- The ± is the standard error of the cell's *difference* from the reference row's (ES).",
         "  Every row is run on the same truths, from the same prior ensembles,",
-        "  so that variability due to these somewhat cancels.",
+        "  so that variability due to these somewhat cancels. `wins vs ES` counts the truths on which",
+        "  the row's forecast CRPS beats ES's: two rows other than ES are told apart only roughly, by their ±.",
         f"- {WORSE}: worse than the prior, by more than twice the standard error of the difference.",
-        "- A lower (data) misfit is not necessarily better; could be overfitting.",
+        "- The misfit is the mean squared normalized residual, over members and observations: about 2 at",
+        "  the noise level, 1 for the truth. Being heavy-tailed, it is shown as the median over the truths,",
+        "  with the number of truths on which the posterior fits worse than the prior did. A low misfit is",
+        "  not necessarily good; could be overfitting.",
+        "- `spread/RMSE` is about 1 for a calibrated ensemble; well below it, overconfident.",
         "- Failed simulations are left out of the data and forecast scores, and counted in `failed members`.",
     ]
     for case_name, by_ne in results.items():
@@ -317,7 +339,8 @@ def main():
 
     # Every experiment of every (case, size) in one pool, so that many cores are kept busy
     runs = [(c, ne, args.truths or CASES[c].truths) for c in args.case or CASES for ne in args.ne or CASES[c].sizes]
-    jobs = [(c, ne, m, i) for c, ne, truths in runs for m in methods for i in range(truths)]
+    # A row with members of its own is run for the full tables only (NE), not at the other sizes
+    jobs = [(c, ne, m, i) for c, ne, truths in runs for m in methods if "members" not in m or ne == NE for i in range(truths)]
     print(f"{len(jobs)} experiments: " + ", ".join(f"{c} ({ne} members, {t} truths)" for c, ne, t in runs), flush=True)
     with ProcessPoolExecutor(args.workers, initializer=logging.disable, initargs=(logging.WARNING,)) as pool:
         done = list(pool.map(experiment, *zip(*[(c, m, i, ne) for c, ne, m, i in jobs])))
@@ -331,6 +354,8 @@ def main():
         results = {"meta": {"truths": truths, "ne": ne}, "methods": dict(old["methods"]) if compatible else {}}
         for m in methods:
             mine = [d for (c, n, mm, _), d in zip(jobs, done) if (c, n, mm) == (case_name, ne, m)]
+            if not mine:
+                continue
             results["methods"][m["label"]] = {
                 **stamp,
                 "runs": [d["runs"] for d in mine],

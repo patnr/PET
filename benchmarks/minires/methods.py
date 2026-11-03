@@ -1,10 +1,15 @@
 """The methods compared: each a label and its ``[dataassim]`` settings.
 
 The settings are PET's own, as a config would give them, except that a distance localization
-gives its ``radius`` in metres: ``run.py`` places a taper of that radius at each datum's well,
-on the case's grid. Unless a row says it is tuned, the settings are defaults or the textbook
-choice, the same for every case. A tuned row is added below its default's for each method whose
+gives its ``radius`` as a multiple of the case's prior correlation range: ``run.py`` places a
+taper of that radius at each datum's well, on the case's grid, and leaves the case's scalars
+unlocalized. Unless a row says it is tuned, the settings are defaults or the textbook choice,
+the same for every case. A tuned row is added below its default's for each method whose
 default ``tune.py`` beat, at the setting it chose (``results/tuning.json``).
+
+A row may also give ``members``, an ensemble size of its own: the reference at the iterating
+schemes' budget, 125 members for 250 simulations, is such a row. It is run at that size whatever
+the size of the table it appears in, and left out of the tables by ensemble size.
 """
 
 import json
@@ -16,6 +21,12 @@ METHODS = [
     {
         "label": "ES (one update)",
         "dataassim": {"scheme": "es", "analysis": "approx"},
+    },
+    {
+        # The same simulations as the iterating rows (4 x the members, plus the posterior's): members, not iterations
+        "label": "ES (one update, 125 members)",
+        "dataassim": {"scheme": "es", "analysis": "approx"},
+        "members": 125,
     },
     {
         # The iterating schemes read their truncation from the iteration block, not from COMMON
@@ -65,13 +76,13 @@ METHODS = [
         },
     },
     {
-        # The radius, in metres, is the prior's correlation range; the scalars have no position
-        "label": "ES-MDA (4 steps, α = 4), distance localization (Gaspari-Cohn, 300 m)",
+        # The radius is the prior's correlation range (a multiple of it, see the module docstring)
+        "label": "ES-MDA (4 steps, α = 4), distance localization (Gaspari-Cohn, radius 1 range)",
         "dataassim": {
             "scheme": "esmda",
             "analysis": "approx",
             "mda": {"tot_assim_steps": 4, "inflation_param": [4, 4, 4, 4]},
-            "localization": {"name": "distance_loc", "taper_func": "gc", "radius": 300.0, "unlocalized": ["sor"]},
+            "localization": {"name": "distance_loc", "taper_func": "gc", "radius": 1.0},
         },
     },
 ]

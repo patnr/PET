@@ -3,14 +3,18 @@
 The reservoir is a 1000 x 1000 x 20 m box in metric units (m, day, bar, mD, cP), with
 injectors on rate and producers on bottom-hole pressure, 40 report steps of 60 days. The
 producers' rates, and when they water out, are therefore outcomes of the permeability
-around them. The base case has one injector at the centre and four producers towards the
-corners; the others vary it, each to put a different demand on the methods.
+around them. The base case has nine producers on a 3 x 3 grid and four injectors between
+them, on a 50 x 50 grid, and is observed over 16 steps, by which time about half of the
+producers have watered out; the others vary it, each to put a different demand on the methods.
 
-The unknowns are the log-permeability field and some scalars of the fluid (the residual oil
-saturation ``sor``, by default); the rest of the fluid is known. Each twin experiment draws
-its truth from the same prior as the ensemble, simulates it to the end, and perturbs the
-history part into observations; the forecast part is what the posterior is scored against,
-unseen.
+The unknowns are the log-permeability field and, in the `scalars` case, the residual oil
+saturation ``sor``; the rest of the fluid is known. Each twin experiment draws its truth from
+the same prior as the ensemble, simulates it to the end, and perturbs the history part into
+observations; the forecast part is what the posterior is scored against, unseen.
+
+The cases were chosen by screening (2026-11-03) for a field that the data improve substantially,
+and a forecast that tells the methods apart, and apart from their fit of the history: at
+25 x 25 cells, or with fewer wells, or a shorter correlation range, they do neither nearly as well.
 """
 
 from dataclasses import dataclass, field
@@ -39,6 +43,7 @@ CORNERS = ((0.15, 0.15), (0.85, 0.15), (0.15, 0.85), (0.85, 0.85))
 CENTRE = ((0.5, 0.5),)
 NINE = tuple((x, y) for y in (0.1, 0.5, 0.9) for x in (0.1, 0.5, 0.9))  # producers on a 3 x 3 grid
 FOUR = ((0.3, 0.3), (0.7, 0.3), (0.3, 0.7), (0.7, 0.7))  # injectors between them
+SOR = {"sor": (0.22, 0.04, [0.05, 0.40])}  # the unknown scalar of the `scalars` case: (mean, sd, limits)
 
 
 @dataclass(frozen=True)
@@ -48,16 +53,16 @@ class Case:
     truths: int  # the number of twin experiments run by default
     sizes: tuple = (NE,)  # the ensemble sizes run by default
     about: str = ""  # what sets the case apart, and what it is to show
-    producers: tuple = CORNERS  # positions, as fractions of the extent
-    injectors: tuple = CENTRE
+    producers: tuple = NINE  # positions, as fractions of the extent
+    injectors: tuple = FOUR
     injection: float = 1000.0  # the total injection rate [m3/day], shared by the injectors
     history: int = 16  # the observed steps, of which every ``obs_every``-th is assimilated
-    obs_every: int = 4
+    obs_every: int = 2
     vo: float = 5.0  # the oil viscosity [cP]; the water's is 1
-    range: float = 300.0  # the prior's correlation range [m]
+    range: float = 450.0  # the prior's correlation range [m]
     sd: float = LOGK_SD  # the prior's standard deviation of log K
-    # The unknown scalars of the fluid: {name: (mean, sd, limits)}
-    scalars: dict = field(default_factory=lambda: {"sor": (0.22, 0.04, [0.05, 0.40])})
+    # The unknown scalars of the fluid: {name: (mean, sd, limits)}; none by default
+    scalars: dict = field(default_factory=dict)
 
     @property
     def dx(self):
@@ -124,7 +129,8 @@ class Case:
         return ens
 
     def distance_entries(self, radius: float) -> list:
-        """Distance-localization entries: a taper of ``radius`` metres on the field, at each datum's well."""
+        """Distance-localization entries: a taper of ``radius`` metres on the field, at each datum's well.
+        A method gives the radius as a multiple of the prior's correlation range (``run.py`` converts)."""
         cells = {w["name"]: [int(w["xy"][0] // self.dx), int(w["xy"][1] // self.dx)] for w in self.model()["wells"]}
         return [
             {"x": x, "y": y, "z": 0, "radius": int(round(radius / self.dx)), "z_range": ":", "aniso": 1.0,
@@ -148,17 +154,21 @@ class Case:
 CASES = {
     c.name: c
     for c in [
-        Case("coarse", 25, truths=20, sizes=(20, 50, 100), about="The base case."),
-        Case("fine", 50, truths=8, about="The base case, at twice the resolution."),
-        Case("unfavourable", 25, truths=20, vo=50.0, about=(
-            "Oil 50 times as viscous as water: the water breaks through early and abruptly, so the "
-            "history is strongly nonlinear in the permeability. Where iterating should pay.")),
-        Case("pattern", 25, truths=20, producers=NINE, injectors=FOUR, range=150.0, about=(
-            "Nine producers and four injectors, on a field of half the correlation range (150 m): "
-            "many data, each informative about its own neighbourhood only. Where localization should pay.")),
-        Case("early", 25, truths=20, history=6, obs_every=2, about=(
-            "Only the first 6 steps observed, before any water breaks through: rates and pressures, "
-            "nearly linear in the permeability. Where a single update should do.")),
+        Case("base", 50, truths=20, sizes=(20, 50, 100), about="The base case."),
+        Case("coarse", 25, truths=20, about=(
+            "The base case at 25 x 25 cells: a fifth of the cost, for quick checks. Its smeared fronts "
+            "make the history less nonlinear, and the methods harder to tell apart.")),
+        Case("rough", 50, truths=20, range=300.0, about=(
+            "A correlation range of 300 m instead of 450: more degrees of freedom in the field than the "
+            "data can fix, so spurious correlations cost more. Where ES-MDA at 50 members collapses and "
+            "localization should pay most.")),
+        Case("viscous", 50, truths=20, vo=20.0, about=(
+            "Oil 20 times as viscous as water: the water breaks through early and abruptly, so the history "
+            "is strongly nonlinear in the permeability. Where iterating should pay most.")),
+        Case("scalars", 50, truths=20, scalars=SOR, about=(
+            "The base case with the residual oil saturation `sor` unknown too (prior 0.22 ± 0.04): a global "
+            "scalar next to the field, which a localization must leave alone, and which the water cuts "
+            "constrain only late.")),
     ]
 }
 
