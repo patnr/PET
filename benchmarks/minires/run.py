@@ -40,7 +40,7 @@ import numpy as np
 import pandas as pd
 
 from cases import CASES, NE, NSTEPS, Case, twin
-from findings import FINDINGS
+from findings import FINDINGS, TABLES
 from input_output.config import normalize
 from methods import COMMON, METHODS, REFERENCE
 from pipt.update_schemes.registry import get_scheme
@@ -112,11 +112,13 @@ def experiment(case_name: str, method: dict, i: int, ne: int) -> dict:
 # Tables
 # ----------------------------------------------------------------------
 def tables(case: Case) -> dict:
-    """The tables of a case, each ``{score: column}``. Besides the scores of ``scores.py``: ``wins``,
-    the truths on which the row's forecast CRPS beats the reference's; ``blowups``, the truths on
-    which the row fits the history worse than the prior; and ``runs``, the simulations spent."""
+    """The tables of a case, each ``{score: column}``, keyed as in ``findings.TABLES``. Besides the
+    scores of ``scores.py``: ``wins``, the truths on which the row's forecast CRPS beats the
+    reference's; ``blowups``, the truths on which the row fits the history worse than the prior;
+    and ``runs``, the simulations spent. The field's correlation is not shown: on these cases it
+    tells no more than its RMSE."""
     return {
-        "The forecast, and the fit of the history": {
+        "forecast": ("The forecast, and the fit of the history", {
             "forecast_wwct_crps": "CRPS forecast WWCT",
             "wins": "wins vs ES",
             "breakthrough_crps": "CRPS breakthrough [days]",
@@ -124,13 +126,23 @@ def tables(case: Case) -> dict:
             "blowups": "worse fit than the prior",
             "failed": "failed members",
             "runs": "simulations",
-        },
-        "The log-permeability": {"logk_rmse": "RMSE", "logk_crps": "CRPS", "logk_ratio": "spread/RMSE", "logk_corr": "corr"},
+        }),
+        "logk": ("The log-permeability", {"logk_rmse": "RMSE", "logk_crps": "CRPS", "logk_ratio": "spread/RMSE"}),
         **{
-            f"The scalar `{n}`": {f"{n}_error": "error", f"{n}_spread": "spread", f"{n}_crps": "CRPS"}
+            n: (f"The scalar `{n}`", {f"{n}_error": "error", f"{n}_spread": "spread", f"{n}_crps": "CRPS"})
             for n in case.scalars
         },
     }
+
+
+def omitted(keys: list, case_name: str, ne: int) -> list:
+    """The line that stands in for the tables not shown."""
+    if not keys:
+        return []
+    what = [{"forecast": "the forecast", "logk": "the field", "sizes": "the ensemble sizes"}.get(k, f"the scalar `{k}`") for k in keys]
+    names = what[0] if len(what) == 1 else ", ".join(what[:-1]) + " and " + what[-1]
+    return ["", f"The table{'s' if len(keys) > 1 else ''} of {names} {'are' if len(keys) > 1 else 'is'} omitted: "
+            f"the picture is that of `base`, as the findings say. Every score is in `results/{case_name}-ne{ne}.json`."]
 
 
 COUNTS = ["failed", "runs"]  # shown as plain means
@@ -178,7 +190,8 @@ def label_of(label: str, other: dict) -> str:
     return label + (" (reference)" if label == REFERENCE else "") + (f" [`{other[label]}`]" if label in other else "")
 
 
-def render_case(title: str, res: dict, case: Case, findings: str = "") -> list:
+def render_case(title: str, res: dict, case: Case, findings: str = "", shown: list = None) -> list:
+    """The tables of a case; only those keyed in ``shown``, if given, the others in a line."""
     meta, runs = res["meta"], res["methods"]
     prior = next(iter(runs.values()))["prior"]  # the same for every method: the same seeds
     ref = runs[REFERENCE]["posterior"]
@@ -194,7 +207,13 @@ def render_case(title: str, res: dict, case: Case, findings: str = "") -> list:
         *(["", f"**Findings.** {findings}"] if findings else []),
     ]
     rows = [("prior", prior, None)] + [(label, r["posterior"], r["runs"]) for label, r in runs.items()]
-    for heading, columns in tables(case).items():
+    if shown is not None:
+        lines += omitted([k for k in tables(case) if k not in shown], case.name, meta["ne"])
+    for key, (heading, columns) in tables(case).items():
+        if shown is not None and key not in shown:
+            continue
+        if not any(np.any(sc.get("failed", [])) for _, sc, _ in rows):  # a column only when there were any
+            columns = {k: v for k, v in columns.items() if k != "failed"}
         lines += ["", f"**{heading}**", ""]
         lines += ["| | " + " | ".join(columns.values()) + " |", "|---" * (len(columns) + 1) + "|"]
         for label, sc, sims in rows:
@@ -223,35 +242,34 @@ def render_case(title: str, res: dict, case: Case, findings: str = "") -> list:
     return lines
 
 
-# The scores shown against the ensemble size, each {score: heading}
+# The scores shown against the ensemble size, each {score: column}
 BY_SIZE = {"forecast_wwct_crps": "CRPS forecast WWCT", "logk_rmse": "logK RMSE", "logk_ratio": "logK spread/RMSE"}
 
 
 def render_sizes(title: str, by_ne: dict, findings: str = "") -> list:
-    """A few scores of each method, at each ensemble size: ``by_ne`` is ``{ne: results}``."""
+    """A few scores of each method, at each ensemble size, in one table: ``by_ne`` is ``{ne: results}``.
+    Without ±, which at the other sizes are of the order of those at ``NE`` in the tables above."""
     sizes = sorted(by_ne)
     truths = {by_ne[ne]["meta"]["truths"] for ne in sizes}
-    lines = ["", title, "", f"{', '.join(map(str, sorted(truths)))} truths. The ± are against ES at the same size."]
+    lines = ["", title, "", f"{', '.join(map(str, sorted(truths)))} truths. Each cell is at "
+             f"{' / '.join(map(str, sizes))} members, without ±: those at {NE} are in the tables above, and the "
+             "others are of the same order."]
     lines += ["", f"**Findings.** {findings}"] if findings else []
     # A row with members of its own is at that size in every table: it has no place here
     labels = [m["label"] for m in METHODS if "members" not in m and any(m["label"] in by_ne[ne]["methods"] for ne in sizes)]
-    for k, heading in BY_SIZE.items():
-        lines += ["", f"**{heading}**", ""]
-        lines += ["| | " + " | ".join(f"{ne} members" for ne in sizes) + " |", "|---" * (len(sizes) + 1) + "|"]
-        for label in ["prior", *labels]:
-            cells = []
+    lines += ["", "| | " + " | ".join(BY_SIZE.values()) + " |", "|---" * (len(BY_SIZE) + 1) + "|"]
+    for label in ["prior", *labels]:
+        cells = []
+        for k in BY_SIZE:
+            at_size = []
             for ne in sizes:
                 runs = by_ne[ne]["methods"]
                 prior = next(iter(runs.values()))["prior"]
-                ref = runs[REFERENCE]["posterior"]
                 sc = prior if label == "prior" else runs.get(label, {}).get("posterior", {})
-                if k not in sc:
-                    cells.append("")
-                    continue
-                against = None if label == REFERENCE else ref.get(k)
                 flag_vs = None if label == "prior" else prior.get(k)
-                cells.append(cell(sc[k], against, flag_vs, better(k)))
-            lines += [f"| {label_of(label, {})} | " + " | ".join(cells) + " |"]
+                at_size.append(cell(sc[k], None, flag_vs, better(k)) if k in sc else "–")
+            cells.append(" / ".join(at_size))
+        lines += [f"| {label_of(label, {})} | " + " | ".join(cells) + " |"]
     return lines
 
 
@@ -274,14 +292,17 @@ def render(results: dict) -> str:
         "  with the number of truths on which the posterior fits worse than the prior did. A low misfit is",
         "  not necessarily good; could be overfitting.",
         "- `spread/RMSE` is about 1 for a calibrated ensemble; well below it, overconfident.",
-        "- Failed simulations are left out of the data and forecast scores, and counted in `failed members`.",
+        "- Failed simulations are left out of the data and forecast scores, and counted in `failed members`,",
+        "  a column shown only when there were any.",
+        "- A case other than `base` shows only the table that carries its story; the others are summed",
+        "  up in a line, and `python run.py --show` prints every table of every case.",
     ]
     for case_name, by_ne in results.items():
         case = CASES[case_name]
         if NE in by_ne:
             title = f"## Case `{case_name}`: {case.n} x {case.n} cells"
-            lines += render_case(title, by_ne[NE], case, FINDINGS.get(case_name, ""))
-        if len(by_ne) > 1:
+            lines += render_case(title, by_ne[NE], case, FINDINGS.get(case_name, ""), TABLES.get(case_name))
+        if len(by_ne) > 1 and "sizes" in TABLES.get(case_name, ["sizes"]):
             lines += render_sizes(f"### Case `{case_name}`: by ensemble size", by_ne, FINDINGS.get(f"{case_name}/sizes", ""))
     return "\n".join(lines) + "\n"
 
@@ -327,7 +348,13 @@ def main():
     parser.add_argument("--ne", type=int, action="append", help="default: the case's own sizes")
     parser.add_argument("--workers", type=int, default=os.cpu_count())
     parser.add_argument("--quick", action="store_true", help=f"default to {QUICK}")
+    parser.add_argument("--show", action="store_true", help="print every table of the official results, and run nothing")
     args = parser.parse_args()
+    if args.show:
+        for case_name, by_ne in load_all().items():
+            for ne, res in sorted(by_ne.items()):
+                print("\n".join(render_case(f"## Case `{case_name}`, {ne} members", res, CASES[case_name])))
+        return
     if args.quick:
         args.case = args.case or QUICK["case"]
         args.truths = args.truths or QUICK["truths"]

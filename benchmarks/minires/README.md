@@ -46,7 +46,7 @@ cells, with fewer wells, or with a shorter correlation range, it does neither ne
 | `run.py` | Runs the methods on the cases, and generates `RESULTS.md`. |
 | `tune.py` | Tunes the methods' settings, on twin experiments of its own, into `results/tuning.json`; `methods.py` adds a tuned row for each method whose default it beat. |
 | `results/` | The scores of each case and ensemble size (`<case>-ne<ne>.json`), per method and truth, with the PET commit each method was run at; `RESULTS.md` is generated from them. |
-| `findings.py` | What the tables show, a few sentences per heading of `RESULTS.md`. Written by hand; check them when the results are redone. |
+| `findings.py` | What the tables show, a few sentences per heading of `RESULTS.md`, and which of each case's tables it shows. Written by hand; check them when the results are redone. |
 | `RESULTS.md` | The tables. Generated; do not edit by hand. |
 
 `tests/test_benchmark_minires.py` checks that each method still runs, on one tiny experiment.
@@ -60,6 +60,7 @@ python run.py --quick --workers 4     # while developing: the coarse case, 3 tru
 python run.py                         # the official run: every method, case and ensemble size
 python run.py --case base --ne 50     # one case, one ensemble size (default: the case's own sizes)
 python run.py --method "ES-MDA"       # only the methods whose label contains this, and the reference (ES)
+python run.py --show                  # print every table of the official results, and run nothing
 ```
 
 A run of other than the case's own number of truths, such as a quick run, prints its tables
@@ -86,6 +87,9 @@ commit than the rest of its table is marked with that commit. The full tables ar
   history worse than the prior did: a blow-up.
 - The iterating rows spend 250 simulations where ES spends 100; `ES (one update, 125 members)`
   spends the same 250 on members instead, for an equal-budget comparison.
+- `base` gets every table; a case that varies it gets only the table that carries its story
+  (`TABLES` of `findings.py`), the others being its findings' "the picture is that of `base`" in
+  numbers. `run.py --show` prints them all.
 
 ## Tuning
 

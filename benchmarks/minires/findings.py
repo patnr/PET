@@ -1,9 +1,19 @@
 """What the tables of RESULTS.md show, in a few sentences per heading: written by hand, rendered by run.py.
 
-Keyed by case (its full tables, at NE members), or by ``<case>/sizes`` (its tables by ensemble
-size). Written from the official runs of 2026-11-03: when those are redone, check that these
-still hold. Each says what the case was to show, whether it does, and what follows for PET.
+``FINDINGS`` is keyed by case (its tables at NE members), or by ``<case>/sizes`` (its table by
+ensemble size). Each says what the case was to show, whether it does, and what follows for PET.
+``TABLES`` says which of a case's tables RESULTS.md shows (keyed as in ``run.tables``, and
+``sizes``): the others repeat the picture of ``base``, and are stood in for by a line. Both are
+written from the official runs of 2026-11-03: when those are redone, check that they still hold.
 """
+
+TABLES = {
+    "base": ["forecast", "logk", "sizes"],
+    "coarse": [],
+    "rough": ["logk"],
+    "viscous": ["forecast"],
+    "scalars": ["sor"],
+}
 
 FINDINGS = {
     "base": (
@@ -32,7 +42,7 @@ FINDINGS = {
         "and localization; at 100, the choice of iterating scheme matters little, and localization still helps."
     ),
     "coarse": (
-        "The same picture at a fifth of the cost: the field improves by 44 %, distance localization forecasts best "
+        "The picture of `base` at a fifth of the cost: the field improves by 44 %, distance localization forecasts best "
         "(0.028), ES-MDA is the most overconfident row (0.29). The differences between the iterating rows are "
         "smaller: ES-MDA is within 0.006 ± 0.003 of LM-EnRML, and GN-EnRML tuned within 0.002. EnIF does much "
         "better here (0.048, against 0.071 on `base`): its neighbourhood is counted in cells, so it reaches "
@@ -53,7 +63,8 @@ FINDINGS = {
         "truths. The step control matters more here than elsewhere: GN-EnRML at its default step lengths (0.048) "
         "is the worst of the iterating rows, and its tuned γ max = 1 (0.036) is worse than LM-EnRML by "
         "0.007 ± 0.002 (18/20 to LM). ES-MDA's four steps at α = 4 lose less to LM-EnRML here (0.006 ± 0.004) "
-        "than its collapse (spread/RMSE 0.25) would suggest."
+        "than its collapse (spread/RMSE 0.25) would suggest. On the field, the picture is that of `base`, a little "
+        "better for every row (LM-EnRML 0.44, distance localization 0.43, ES-MDA 0.54 at spread/RMSE 0.25)."
     ),
     "scalars": (
         "The unknown `sor` (prior error 0.032, sd 0.040) is learnt by the unlocalized iterating rows to an error "
@@ -62,6 +73,6 @@ FINDINGS = {
         "universal threshold leave it at the prior: they localize a global scalar away. The distance localization "
         "leaves `sor` unlocalized, as `run.py` tells it to, and does as well as LM-EnRML on it (0.022). The extra "
         "unknown costs ES-MDA on the forecast (0.060, against 0.056 on `base`, and now 8/20 against LM-EnRML) "
-        "and LM-EnRML nothing (0.047)."
+        "and LM-EnRML nothing (0.047); otherwise the forecast and the field show the picture of `base`."
     ),
 }
