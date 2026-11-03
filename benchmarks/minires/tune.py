@@ -55,8 +55,8 @@ OBJECTIVE = "forecast_wwct_crps"  # lower is better
 def mda(steps: int, ratio: float) -> dict:
     """An ES-MDA schedule of ``steps`` inflations, each ``ratio`` times the next, whose inverses sum to 1."""
     alphas = np.array([ratio ** (steps - 1 - k) for k in range(steps)], dtype=float)
-    alphas *= np.sum(1 / alphas)
-    return {"mda": {"tot_assim_steps": steps, "inflation_param": [float(f"{a:.4g}") for a in alphas]}}
+    alphas *= np.sum(1 / alphas)  # not rounded: PET checks that the inverses sum to 1
+    return {"mda": {"tot_assim_steps": steps, "inflation_param": [float(a) for a in alphas]}}
 
 
 def iteration(**kw) -> dict:
@@ -69,7 +69,7 @@ def default_first(default, values) -> list:
 
 def schedule(k: int, r: float) -> tuple:
     alphas = mda(k, r)["mda"]["inflation_param"]
-    shown = f"{alphas[0]:g}" if r == 1 else ", ".join(f"{a:g}" for a in alphas)
+    shown = f"{alphas[0]:g}" if r == 1 else ", ".join(f"{a:.4g}" for a in alphas)
     return (f"{k} steps, α ratio {r}", mda(k, r), ("4 steps, α = 4", f"{k} steps, α = {shown}"))
 
 
