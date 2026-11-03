@@ -114,7 +114,7 @@ GRIDS = {
     "ES-MDA (4 steps, α = 4), adaptive localization (3σ threshold)": {
         "cutoff": [
             (f"{c}σ threshold", {"localization": {"cutoff": float(c)}}, ("(3σ threshold)", f"({c}σ threshold)"))
-            for c in (3, 1.5, 2, 2.5, 4)
+            for c in (3, 1, 1.5, 2, 2.5, 4)
         ],
     },
     "ES-MDA (4 steps, α = 4), distance localization (Gaspari-Cohn, radius 1 range)": {
@@ -182,6 +182,7 @@ def main():
         done2 = list(pool.map(experiment, *zip(*[(CASE, method_at(lab, k), OFFSET + SELECT + i, NE) for lab, k, i in confirm]))) if confirm else []
 
     out_file = HERE / "results" / "tuning.json"
+    out_file.parent.mkdir(exist_ok=True)
     tuning = json.loads(out_file.read_text()) if out_file.exists() else {}
     for lab in labels:
         pts = grid_points[lab]
