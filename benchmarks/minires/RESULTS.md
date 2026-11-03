@@ -73,28 +73,28 @@ The base case.
 
 ### Case `base`: by ensemble size
 
-20 truths. Each cell is at 20 / 50 / 100 members, without ±: those at 50 are in the tables above, and the others are of the same order.
+20 truths. Without ±: those at 50 members are in the tables above, and the others are of the same order.
 
 **Findings.** At 20 members, ES learns nothing of the forecast (0.132, prior 0.145), and the unlocalized iterating rows collapse (spread/RMSE 0.08 to 0.36) yet still forecast at 0.076 to 0.093; distance localization at 20 members (0.044) matches LM-EnRML at 100 (0.040) and beats every unlocalized row at 50. At 100 members, the differences shrink (0.036 to 0.045 for the better rows), but ES at 100 (0.065) is still worse than any unlocalized iterating row at 50. EnIF gains least from members (0.095 to 0.068); the adaptive localization at 1.5σ catches the distance localization at 100 (0.036 both). In short: at 50 members, this case needs iterations and localization; at 100, the choice of iterating scheme matters little, and localization still helps.
 
-| | CRPS forecast WWCT | logK RMSE | logK spread/RMSE |
-|---|---|---|---|
-| prior | 0.145 / 0.142 / 0.144 | 0.803 / 0.796 / 0.795 | 1.03 / 1.05 / 1.05 |
-| ES (one update) (reference) | 0.132 / 0.0824 / 0.0645 | 0.771 / 0.706 / 0.569 | 0.149 / 0.366 / 0.626 |
-| LM-EnRML (4 iterations) | 0.0764 / 0.046 / 0.0397 | 0.624 / 0.472 / 0.446 | 0.178 / 0.46 / 0.632 |
-| GN-EnRML (4 iterations) | 0.0863 / 0.0579 / 0.0525 | 0.662 / 0.511 / 0.48 | 0.24 / 0.45 / 0.633 |
-| GN-EnRML (4 iterations, γ = 0.2, γ max = 1.0), tuned | 0.0841 / 0.0494 / 0.045 | 0.714 / 0.524 / 0.49 | 0.094 / 0.299 / 0.501 |
-| GN-EnRML (4 iterations), subspace2 analysis | 0.0913 / 0.0599 / 0.0527 | 0.681 / 0.502 / 0.463 | 0.215 / 0.507 / 0.711 |
-| GN-EnRML (4 iterations, γ = 0.4, γ max = 0.5), subspace2 analysis, tuned | 0.0895 / 0.0507 / 0.0458 | 0.692 / 0.489 / 0.438 | 0.157 / 0.503 / 0.724 |
-| GN-EnRML (4 iterations), margis analysis | 0.0818 / 0.0568 / 0.0544 | 0.584 / 0.465 / 0.455 | 0.363 / 0.644 / 0.764 |
-| GN-EnRML (4 iterations, γ = 0.1, γ max = 1.0), margis analysis, tuned | 0.0689 / 0.0529 / 0.046 | 0.597 / 0.449 / 0.446 | 0.274 / 0.621 / 0.74 |
-| ES-MDA (4 steps, α = 4) | 0.0927 / 0.0558 / 0.0438 | 0.688 / 0.543 / 0.493 | 0.0839 / 0.299 / 0.51 |
-| ES-MDA (4 steps, α = 4), enif analysis | 0.095 / 0.0708 / 0.0677 | 0.612 / 0.536 / 0.526 | 0.945 / 0.991 / 1.03 |
-| ES-MDA (4 steps, α = 4), enif analysis (neighbourhood 1), tuned | 0.0973 / 0.0643 / 0.0591 | 0.654 / 0.539 / 0.521 | 0.953 / 0.977 / 1.03 |
-| ES-MDA (4 steps, α = 4), adaptive localization (universal threshold) | 0.135 / 0.0764 / 0.056 | 0.783 / 0.656 / 0.562 | 0.99 / 0.965 / 0.959 |
-| ES-MDA (4 steps, α = 4), adaptive localization (3σ threshold) | 0.118 / 0.0636 / 0.0506 | 0.747 / 0.594 / 0.524 | 0.872 / 0.887 / 0.898 |
-| ES-MDA (4 steps, α = 4), adaptive localization (1.5σ threshold), tuned | 0.0787 / 0.0503 / 0.0364 | 0.702 / 0.563 / 0.491 | 0.378 / 0.572 / 0.707 |
-| ES-MDA (4 steps, α = 4), distance localization (Gaspari-Cohn, radius 1 range) | 0.0442 / 0.035 / 0.0363 | 0.508 / 0.467 / 0.452 | 0.595 / 0.731 / 0.828 |
+| | CRPS forecast WWCT, 20 members | 50 | 100 | logK RMSE, 20 members | 50 | 100 | logK spread/RMSE, 20 members | 50 | 100 |
+|---|---|---|---|---|---|---|---|---|---|
+| prior | 0.145 | 0.142 | 0.144 | 0.803 | 0.796 | 0.795 | 1.03 | 1.05 | 1.05 |
+| ES (one update) (reference) | 0.132 | 0.0824 | 0.0645 | 0.771 | 0.706 | 0.569 | 0.149 | 0.366 | 0.626 |
+| LM-EnRML (4 iterations) | 0.0764 | 0.046 | 0.0397 | 0.624 | 0.472 | 0.446 | 0.178 | 0.46 | 0.632 |
+| GN-EnRML (4 iterations) | 0.0863 | 0.0579 | 0.0525 | 0.662 | 0.511 | 0.48 | 0.24 | 0.45 | 0.633 |
+| GN-EnRML (4 iterations, γ = 0.2, γ max = 1.0), tuned | 0.0841 | 0.0494 | 0.045 | 0.714 | 0.524 | 0.49 | 0.094 | 0.299 | 0.501 |
+| GN-EnRML (4 iterations), subspace2 analysis | 0.0913 | 0.0599 | 0.0527 | 0.681 | 0.502 | 0.463 | 0.215 | 0.507 | 0.711 |
+| GN-EnRML (4 iterations, γ = 0.4, γ max = 0.5), subspace2 analysis, tuned | 0.0895 | 0.0507 | 0.0458 | 0.692 | 0.489 | 0.438 | 0.157 | 0.503 | 0.724 |
+| GN-EnRML (4 iterations), margis analysis | 0.0818 | 0.0568 | 0.0544 | 0.584 | 0.465 | 0.455 | 0.363 | 0.644 | 0.764 |
+| GN-EnRML (4 iterations, γ = 0.1, γ max = 1.0), margis analysis, tuned | 0.0689 | 0.0529 | 0.046 | 0.597 | 0.449 | 0.446 | 0.274 | 0.621 | 0.74 |
+| ES-MDA (4 steps, α = 4) | 0.0927 | 0.0558 | 0.0438 | 0.688 | 0.543 | 0.493 | 0.0839 | 0.299 | 0.51 |
+| ES-MDA (4 steps, α = 4), enif analysis | 0.095 | 0.0708 | 0.0677 | 0.612 | 0.536 | 0.526 | 0.945 | 0.991 | 1.03 |
+| ES-MDA (4 steps, α = 4), enif analysis (neighbourhood 1), tuned | 0.0973 | 0.0643 | 0.0591 | 0.654 | 0.539 | 0.521 | 0.953 | 0.977 | 1.03 |
+| ES-MDA (4 steps, α = 4), adaptive localization (universal threshold) | 0.135 | 0.0764 | 0.056 | 0.783 | 0.656 | 0.562 | 0.99 | 0.965 | 0.959 |
+| ES-MDA (4 steps, α = 4), adaptive localization (3σ threshold) | 0.118 | 0.0636 | 0.0506 | 0.747 | 0.594 | 0.524 | 0.872 | 0.887 | 0.898 |
+| ES-MDA (4 steps, α = 4), adaptive localization (1.5σ threshold), tuned | 0.0787 | 0.0503 | 0.0364 | 0.702 | 0.563 | 0.491 | 0.378 | 0.572 | 0.707 |
+| ES-MDA (4 steps, α = 4), distance localization (Gaspari-Cohn, radius 1 range) | 0.0442 | 0.035 | 0.0363 | 0.508 | 0.467 | 0.452 | 0.595 | 0.731 | 0.828 |
 
 ## Case `coarse`: 25 x 25 cells
 

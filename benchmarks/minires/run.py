@@ -247,28 +247,27 @@ BY_SIZE = {"forecast_wwct_crps": "CRPS forecast WWCT", "logk_rmse": "logK RMSE",
 
 
 def render_sizes(title: str, by_ne: dict, findings: str = "") -> list:
-    """A few scores of each method, at each ensemble size, in one table: ``by_ne`` is ``{ne: results}``.
-    Without ±, which at the other sizes are of the order of those at ``NE`` in the tables above."""
+    """A few scores of each method, at each ensemble size, in one table of a column per score and
+    size: ``by_ne`` is ``{ne: results}``. Without ±, which at the other sizes are of the order of
+    those at ``NE`` in the tables above."""
     sizes = sorted(by_ne)
     truths = {by_ne[ne]["meta"]["truths"] for ne in sizes}
-    lines = ["", title, "", f"{', '.join(map(str, sorted(truths)))} truths. Each cell is at "
-             f"{' / '.join(map(str, sizes))} members, without ±: those at {NE} are in the tables above, and the "
-             "others are of the same order."]
+    lines = ["", title, "", f"{', '.join(map(str, sorted(truths)))} truths. Without ±: those at {NE} members "
+             "are in the tables above, and the others are of the same order."]
     lines += ["", f"**Findings.** {findings}"] if findings else []
     # A row with members of its own is at that size in every table: it has no place here
     labels = [m["label"] for m in METHODS if "members" not in m and any(m["label"] in by_ne[ne]["methods"] for ne in sizes)]
-    lines += ["", "| | " + " | ".join(BY_SIZE.values()) + " |", "|---" * (len(BY_SIZE) + 1) + "|"]
+    header = [f"{column}, {ne} members" if ne == sizes[0] else str(ne) for column in BY_SIZE.values() for ne in sizes]
+    lines += ["", "| | " + " | ".join(header) + " |", "|---" * (len(header) + 1) + "|"]
     for label in ["prior", *labels]:
         cells = []
         for k in BY_SIZE:
-            at_size = []
             for ne in sizes:
                 runs = by_ne[ne]["methods"]
                 prior = next(iter(runs.values()))["prior"]
                 sc = prior if label == "prior" else runs.get(label, {}).get("posterior", {})
                 flag_vs = None if label == "prior" else prior.get(k)
-                at_size.append(cell(sc[k], None, flag_vs, better(k)) if k in sc else "–")
-            cells.append(" / ".join(at_size))
+                cells.append(cell(sc[k], None, flag_vs, better(k)) if k in sc else "")
         lines += [f"| {label_of(label, {})} | " + " | ".join(cells) + " |"]
     return lines
 
